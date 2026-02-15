@@ -46,11 +46,28 @@ public class VelocityInjector implements Injector {
         // chat
         try {
             StateRegistry.PacketRegistry serverbound = getServerboundPacketRegistry(StateRegistry.PLAY);
+            TreeMap<Integer, Integer> knownMappings = new TreeMap<>(packetMapping);
+            if (knownMappings.isEmpty()) {
+                LoggerProvider.getLogger().warn("Unable to register PlayerSessionPacketBlocker: no packet mapping was provided.");
+                return;
+            }
 
             LinkedList<StateRegistry.PacketMapping> playerSessionPacketMapping = new LinkedList<>();
-            for (Map.Entry<Integer, Integer> entry : packetMapping.entrySet()) {
-                LoggerProvider.getLogger().debug("Register PlayerSessionPacketBlocker for protocol version: " + entry.getKey());
-                playerSessionPacketMapping.add(createPacketMapping(entry.getValue(), ProtocolVersion.getProtocolVersion(entry.getKey()), false));
+            for (ProtocolVersion supportedVersion : SUPPORTED_VERSIONS) {
+                int protocol = supportedVersion.getProtocol();
+                if (protocol < 761) {
+                    continue;
+                }
+                Map.Entry<Integer, Integer> matchedMapping = knownMappings.floorEntry(protocol);
+                if (matchedMapping == null) {
+                    continue;
+                }
+                LoggerProvider.getLogger().debug("Register PlayerSessionPacketBlocker for protocol version: " + protocol + " (mapped from " + matchedMapping.getKey() + ")");
+                playerSessionPacketMapping.add(createPacketMapping(matchedMapping.getValue(), supportedVersion, false));
+            }
+            if (playerSessionPacketMapping.isEmpty()) {
+                LoggerProvider.getLogger().warn("Unable to register PlayerSessionPacketBlocker: no compatible protocol mapping was found.");
+                return;
             }
             registerPacket(serverbound, PlayerSessionPacketBlocker.class, PlayerSessionPacketBlocker::new, playerSessionPacketMapping.toArray(new StateRegistry.PacketMapping[0]));
 
