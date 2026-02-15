@@ -57,6 +57,7 @@ public class MultiInitialLoginSessionHandler {
     private static MethodHandle getMcConnectionField;
     private static MethodHandle getCurrentStateField;
     private static MethodHandle authSessionHandler_allArgsConstructor;
+    private static boolean authSessionHandlerNeedsServerIdHash;
     // 类体常量
     private final InitialLoginSessionHandler initialLoginSessionHandler;
     private final MultiCoreAPI multiCoreAPI; // 这个不是
@@ -127,14 +128,28 @@ public class MultiInitialLoginSessionHandler {
         ));
 
 
-        authSessionHandler_allArgsConstructor = lookup.unreflectConstructor(ReflectUtil.handleAccessible(
+        try {
+            authSessionHandler_allArgsConstructor = lookup.unreflectConstructor(ReflectUtil.handleAccessible(
                 AuthSessionHandler.class.getDeclaredConstructor(
-                        VelocityServer.class,
-                        LoginInboundConnection.class,
-                        com.velocitypowered.api.util.GameProfile.class,
-                        boolean.class
+                    VelocityServer.class,
+                    LoginInboundConnection.class,
+                    com.velocitypowered.api.util.GameProfile.class,
+                    boolean.class,
+                    String.class
                 )
-        ));
+            ));
+            authSessionHandlerNeedsServerIdHash = true;
+        } catch (NoSuchMethodException ignored) {
+            authSessionHandler_allArgsConstructor = lookup.unreflectConstructor(ReflectUtil.handleAccessible(
+                AuthSessionHandler.class.getDeclaredConstructor(
+                    VelocityServer.class,
+                    LoginInboundConnection.class,
+                    com.velocitypowered.api.util.GameProfile.class,
+                    boolean.class
+                )
+            ));
+            authSessionHandlerNeedsServerIdHash = false;
+        }
     }
 
     private void initValues() throws Throwable {
@@ -216,10 +231,22 @@ public class MultiInitialLoginSessionHandler {
                             GameProfile finalGameProfile = gameProfile;
                             mcConnection.getChannel().eventLoop().submit(() -> {
                                 try {
+                                    Object authSessionHandler = authSessionHandlerNeedsServerIdHash
+                                        ? authSessionHandler_allArgsConstructor.invoke(
+                                        this.server,
+                                        inbound,
+                                        generateGameProfile(finalGameProfile),
+                                        true,
+                                        serverId
+                                    )
+                                        : authSessionHandler_allArgsConstructor.invoke(
+                                        this.server,
+                                        inbound,
+                                        generateGameProfile(finalGameProfile),
+                                        true
+                                    );
                                     this.mcConnection.setActiveSessionHandler(StateRegistry.LOGIN,
-                                            (AuthSessionHandler) authSessionHandler_allArgsConstructor.invoke(
-                                                    this.server, inbound, generateGameProfile(finalGameProfile), true
-                                            ));
+                                        (AuthSessionHandler) authSessionHandler);
                                 } catch (Throwable e) {
                                     throw new RuntimeException(e);
                                 }
