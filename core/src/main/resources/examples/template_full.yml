@@ -1,0 +1,64 @@
+#####################################################################
+#
+# LiteLogin authentication service template
+# Supported service types: OFFICIAL, BLESSING_SKIN
+#
+#####################################################################
+
+# Unique service id. Do not change it after the service is in use.
+id: -1
+
+# Display name used in commands and logs.
+name: 'Unnamed'
+
+# OFFICIAL or BLESSING_SKIN
+serviceType: OFFICIAL
+
+yggdrasilAuth:
+  # Append the player IP when validating the session.
+  trackIp: false
+
+  # Timeout for the hasJoined request in milliseconds.
+  timeout: 10000
+
+  # Retry count for temporary network errors.
+  retry: 0
+
+  # Delay between retries in milliseconds.
+  retryDelay: 0
+
+  official:
+    # Optional custom Mojang-compatible session server.
+    sessionServer: 'https://sessionserver.mojang.com'
+
+  blessingSkin:
+    # Blessing Skin Yggdrasil API root.
+    apiRoot: 'https://example.com/api/yggdrasil'
+
+  authProxy:
+    # DIRECT, HTTP or SOCKS
+    type: 'DIRECT'
+    hostname: '127.0.0.1'
+    port: 1080
+    username: ''
+    password: ''
+
+# DEFAULT, OFFLINE or RANDOM
+initUUID: 'DEFAULT'
+
+# Initial in-game name template.
+initNameFormat: '{name}'
+
+# Enable a per-service whitelist.
+whitelist: false
+
+skinRestorer:
+  # OFF, LOGIN or ASYNC
+  restorer: 'OFF'
+
+  # URL or UPLOAD
+  method: 'URL'
+
+  timeout: 10000
+  retry: 2
+  retryDelay: 5000

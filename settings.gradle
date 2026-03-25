@@ -1,17 +1,8 @@
-rootProject.name = 'MultiLogin'
+rootProject.name = 'LiteLogin'
 
 include 'api'
 include 'core'
-//flow work API
-include 'flows'
 include 'loader'
 
 include 'velocity'
 include 'velocity:injector'
-//
-//include 'bungee'
-//include 'bungee:injector'
-//
-//include 'bukkit'
-//include 'bukkit:injector'
-

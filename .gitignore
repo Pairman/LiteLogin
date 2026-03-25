@@ -15,11 +15,8 @@ fabric/.gradle/
 /velocity/bin
 /velocity/injector/bin
 /loader/bin
-/flows/bin
 /core/bin
 /api/bin
-/bungee/bin
-/bungee/injector/bin
 /velocity/libraries/*
 !/velocity/libraries/README.md
 /velocity/libraries/Velocity/

@@ -1,13 +1,7 @@
 {
-  "id": "multilogin",
-  "name": "MultiLogin",
+  "id": "litelogin",
+  "name": "LiteLogin",
   "version": "@version@",
-  "authors": @contributors_json@,
-  "dependencies": [
-    {
-      "id": "floodgate",
-      "optional": true
-    }
-  ],
-  "main": "fun.ksnb.multilogin.velocity.main.MultiLoginVelocity"
+  "authors": "@contributors_json@",
+  "main": "org.eu.pnxlr.git.litelogin.velocity.main.LiteLoginVelocity"
 }

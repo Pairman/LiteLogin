@@ -2,16 +2,6 @@ plugins {
     id 'com.gradleup.shadow'
 }
 
-repositories {
-    maven {
-        name 'papermc'
-        url 'https://repo.papermc.io/repository/maven-public/'
-    }
-    mavenCentral()
-    maven { url = 'https://maven.elytrium.net/repo/' }
-}
-
-
 java {
     sourceCompatibility = JavaVersion.VERSION_21
     targetCompatibility = JavaVersion.VERSION_21
@@ -32,9 +22,5 @@ dependencies {
 }
 
 shadowJar {
-    archiveFileName = 'MultiLogin-Velocity-Injector.JarFile'
-}
-
-artifacts {
-    archives shadowJar
+    archiveFileName = 'LiteLogin-Velocity-Injector.JarFile'
 }

@@ -1,0 +1,43 @@
+package org.eu.pnxlr.git.litelogin.core.auth;
+
+import lombok.Getter;
+import org.eu.pnxlr.git.litelogin.api.internal.auth.AuthResult;
+import org.eu.pnxlr.git.litelogin.api.profile.GameProfile;
+import org.eu.pnxlr.git.litelogin.core.auth.service.BaseServiceAuthenticationResult;
+import org.eu.pnxlr.git.litelogin.core.auth.service.yggdrasil.UnmodifiableGameProfile;
+import org.eu.pnxlr.git.litelogin.core.auth.service.yggdrasil.YggdrasilAuthenticationResult;
+import org.eu.pnxlr.git.litelogin.core.auth.validate.ValidateAuthenticationResult;
+
+@Getter
+public class LoginAuthResult implements AuthResult {
+    private final UnmodifiableGameProfile response;
+    private final String kickMessage;
+    private final Result result;
+    private final BaseServiceAuthenticationResult baseServiceAuthenticationResult;
+    private final ValidateAuthenticationResult validateAuthenticationResult;
+
+    protected LoginAuthResult(UnmodifiableGameProfile response, String kickMessage, Result result,
+                              BaseServiceAuthenticationResult baseServiceAuthenticationResult, ValidateAuthenticationResult validateAuthenticationResult) {
+        this.response = response;
+        this.kickMessage = kickMessage;
+        this.result = result;
+        this.baseServiceAuthenticationResult = baseServiceAuthenticationResult;
+        this.validateAuthenticationResult = validateAuthenticationResult;
+    }
+
+    public static LoginAuthResult ofDisallowedByYggdrasilAuthenticator(YggdrasilAuthenticationResult yggdrasilAuthenticationResult, String kickMessage) {
+        return new LoginAuthResult(null, kickMessage, Result.DISALLOW_BY_YGGDRASIL_AUTHENTICATOR, yggdrasilAuthenticationResult, null);
+    }
+
+    public static LoginAuthResult ofDisallowedByValidateAuthenticator(BaseServiceAuthenticationResult baseServiceAuthenticationResult,
+                                                                      ValidateAuthenticationResult validateAuthenticationResult,
+                                                                      String kickMessage) {
+        return new LoginAuthResult(null, kickMessage, Result.DISALLOW_BY_VALIDATE_AUTHENTICATOR, baseServiceAuthenticationResult, validateAuthenticationResult);
+    }
+
+    public static LoginAuthResult ofAllowed(BaseServiceAuthenticationResult baseServiceAuthenticationResult,
+                                            ValidateAuthenticationResult validateAuthenticationResult,
+                                            GameProfile gameProfile) {
+        return new LoginAuthResult(UnmodifiableGameProfile.unmodifiable(gameProfile), null, Result.ALLOW, baseServiceAuthenticationResult, validateAuthenticationResult);
+    }
+}
