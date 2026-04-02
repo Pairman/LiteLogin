@@ -1,10 +1,7 @@
-package org.eu.pnxlr.git.litelogin.loader.task;
+package org.eu.pnxlr.git.litelogin.loader;
 
 import org.eu.pnxlr.git.litelogin.api.internal.logger.LoggerProvider;
 import org.eu.pnxlr.git.litelogin.api.internal.util.IOUtil;
-import org.eu.pnxlr.git.litelogin.loader.exception.InitialFailedException;
-import org.eu.pnxlr.git.litelogin.loader.library.Library;
-import org.eu.pnxlr.git.litelogin.loader.main.PluginLoader;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -52,14 +49,14 @@ public class LibraryDownloadTask {
         byte[] bytes = null;
 
         List<Exception> exceptions = new ArrayList<>();
-        for (String repository : PluginLoader.repositories) {
+        for (String repository : PluginLoader.REPOSITORIES) {
             String downloadUrl = repository + library.getDownloadUrl();
             LoggerProvider.getLogger().debug("Downloading from " + downloadUrl);
             try {
                 bytes = getBytes(URI.create(downloadUrl).toURL());
                 break;
             } catch (Exception t) {
-                exceptions.add(new InitialFailedException(String.format("Download from %s failed.", downloadUrl), t));
+                exceptions.add(new RuntimeException(String.format("Download from %s failed.", downloadUrl), t));
             }
         }
 

@@ -3,34 +3,34 @@ package org.eu.pnxlr.git.litelogin.api.internal.plugin;
 import org.jetbrains.annotations.ApiStatus;
 
 /**
- * 公共命令执行者对象
+ * Shared command sender abstraction.
  */
 @ApiStatus.Internal
 public interface ISender {
 
     /**
-     * 这个命令执行者是不是一位玩家
+     * Returns whether this command sender is a player.
      *
-     * @return 是不是玩家
+     * @return whether this sender is a player
      */
     boolean isPlayer();
 
     /**
-     * 判断是不是控制台
+     * Returns whether this sender is the console.
      */
     boolean isConsole();
 
     /**
-     * 这个命令执行者是否具有某权限
+     * Returns whether this sender has a permission.
      *
-     * @return 是否具有某权限
+     * @return whether this sender has a permission
      */
     boolean hasPermission(String permission);
 
     /**
-     * 给执行者发送特定的字符串消息，使用精美的换行
+     * Sends a formatted string message to the sender.
      *
-     * @param message 发送的字符串消息
+     * @param message message to send
      */
     /*
      * for (String s : message.split("\\r?\\n"))
@@ -39,16 +39,16 @@ public interface ISender {
     void sendMessagePL(String message);
 
     /**
-     * 获得这个命令执行者的名称
+     * Returns the name of this command sender.
      *
-     * @return 命令执行者的名称
+     * @return the command sender name
      */
     String getName();
 
     /**
-     * 获取对应的玩家对象
+     * Returns the corresponding player object.
      *
-     * @return 对应的玩家对象
+     * @return the corresponding player object
      */
     IPlayer getAsPlayer();
 }

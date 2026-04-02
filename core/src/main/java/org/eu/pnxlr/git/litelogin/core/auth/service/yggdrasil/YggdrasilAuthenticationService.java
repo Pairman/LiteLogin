@@ -2,7 +2,7 @@ package org.eu.pnxlr.git.litelogin.core.auth.service.yggdrasil;
 
 import org.eu.pnxlr.git.litelogin.api.internal.logger.LoggerProvider;
 import org.eu.pnxlr.git.litelogin.api.internal.util.ValueUtil;
-import org.eu.pnxlr.git.litelogin.core.configuration.service.BaseServiceConfig;
+import org.eu.pnxlr.git.litelogin.core.configuration.BaseServiceConfig;
 import org.eu.pnxlr.git.litelogin.core.configuration.service.yggdrasil.BaseYggdrasilServiceConfig;
 import org.eu.pnxlr.git.litelogin.core.main.Core;
 
@@ -13,12 +13,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
- * HasJoined 集中处理程序
+ * Central HasJoined handler.
  */
 public class YggdrasilAuthenticationService {
-    private static final AtomicInteger workerId = new AtomicInteger();
+    private static final AtomicInteger WORKER_ID = new AtomicInteger();
     private static final ExecutorService AUTH_EXECUTOR = Executors.newCachedThreadPool(r -> {
-        Thread thread = new Thread(r, "LiteLogin Auth #" + workerId.incrementAndGet());
+        Thread thread = new Thread(r, "LiteLogin Auth #" + WORKER_ID.incrementAndGet());
         thread.setDaemon(true);
         return thread;
     });
@@ -29,7 +29,7 @@ public class YggdrasilAuthenticationService {
     }
 
     /**
-     * 开始验证
+     * Starts authentication.
      */
     public YggdrasilAuthenticationResult hasJoined(String username, String serverId, String ip) throws SQLException {
         final Set<Integer> ids = core.getPluginConfig().getServiceIdMap().entrySet().stream()
@@ -38,27 +38,27 @@ public class YggdrasilAuthenticationService {
         if (ids.size() == 0) return YggdrasilAuthenticationResult.ofNoService();
 
 
-        // 主要的验证服务器ID表
-        // 在HasJoined验证时最先开始验证
+        // Primary authentication service ID set
+        // Verified first during HasJoined
         Set<Integer> primaries = new HashSet<>();
 
-        // 如果只添加了一个验证服务器，那么就直接把它置为 primary
-        // 否则就读数据库选出最近的验证服务器作为 primary
+        // If only one authentication service exists, use it as primary directly.
+        // Otherwise, read the database and pick the most recent service as primary.
         if (ids.size() == 1) {
             primaries.add(ids.iterator().next());
         } else {
-            // 首先获取数据库里面保存的他的 inGameUUID
+            // First, get the in-game UUID stored in the database
             UUID inGameUUID = core.getSqlManager().getInGameProfileTable().getInGameUUIDIgnoreCase(username);
 
-            // 如果获取到了它的 inGameUUID，就去获取 Yggdrasil ID
+            // If an in-game UUID is found, then retrieve the Yggdrasil service IDs
             if (inGameUUID != null) {
-                // 可能有多个
+                // There may be more than one
                 primaries.addAll(core.getSqlManager().getUserDataTable().getOnlineServiceIds(inGameUUID));
             }
         }
 
-        // 次要的验证服务器ID表
-        // 在HasJoined验证时最后开始验证
+        // Secondary authentication service ID set
+        // Verified last during HasJoined
         Set<Integer> secondaries = ids.stream().filter(i -> !primaries.contains(i)).collect(Collectors.toSet());
 
         LoggerProvider.getLogger().debug(String.format(

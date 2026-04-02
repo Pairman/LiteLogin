@@ -1,8 +1,8 @@
-package org.eu.pnxlr.git.litelogin.core.auth.service;
+package org.eu.pnxlr.git.litelogin.core.auth;
 
 import lombok.Getter;
 import org.eu.pnxlr.git.litelogin.api.profile.GameProfile;
-import org.eu.pnxlr.git.litelogin.core.configuration.service.BaseServiceConfig;
+import org.eu.pnxlr.git.litelogin.core.configuration.BaseServiceConfig;
 
 @Getter
 public abstract class BaseServiceAuthenticationResult {

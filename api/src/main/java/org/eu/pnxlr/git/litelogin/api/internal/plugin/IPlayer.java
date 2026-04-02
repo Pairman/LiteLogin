@@ -8,28 +8,28 @@ import java.util.UUID;
 @ApiStatus.Internal
 public interface IPlayer extends ISender {
     /**
-     * 以给定的理由踢出这名玩家
+     * Kicks the player for the given reason.
      *
-     * @param message 给定的理由
+     * @param message the reason
      */
     void kickPlayer(String message);
 
     /**
-     * 返回该名玩家的游戏内 UUID
+     * Returns this player's in-game UUID.
      *
-     * @return 玩家的游戏内 UUID
+     * @return the player's in-game UUID
      */
     UUID getUniqueId();
 
     /**
-     * 返回该名玩家的 IP 地址
+     * Returns this player's IP address.
      *
-     * @return 玩家的 IP 地址
+     * @return the player's IP address
      */
     SocketAddress getAddress();
 
     /**
-     * 返回玩家还在不在线
+     * Returns whether the player is still online.
      */
     boolean isOnline();
 }

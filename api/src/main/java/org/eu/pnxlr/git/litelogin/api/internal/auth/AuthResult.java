@@ -4,29 +4,29 @@ import org.eu.pnxlr.git.litelogin.api.profile.GameProfile;
 import org.jetbrains.annotations.ApiStatus;
 
 /**
- * 验证结果
+ * Authentication result.
  */
 @ApiStatus.Internal
 public interface AuthResult {
 
     /**
-     * 返回最终验证通过的游戏档案数据
+     * Returns the final approved game profile.
      *
-     * @return 最终验证通过的游戏档案数据
+     * @return the final approved game profile
      */
     GameProfile getResponse();
 
     /**
-     * 返回最终验证不通过的踢出提示
+     * Returns the kick message when authentication fails.
      *
-     * @return 最终验证不通过的踢出提示
+     * @return the kick message when authentication fails
      */
     String getKickMessage();
 
     /**
-     * 返回登录结果
+     * Returns the login result.
      *
-     * @return 登录结果
+     * @return login result
      */
     Result getResult();
 

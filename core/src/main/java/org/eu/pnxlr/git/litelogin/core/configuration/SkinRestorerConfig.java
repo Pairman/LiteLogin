@@ -5,38 +5,24 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
 import org.spongepowered.configurate.CommentedConfigurationNode;
-import org.spongepowered.configurate.serialize.SerializationException;
 
 /**
- * 表示一个皮肤修复配置
+ * Represents a skin restoration configuration.
  */
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
 @ToString
 public class SkinRestorerConfig {
-    private final RestorerType restorer;
-    private final Method method;
-    private final int timeout;
-    private final int retry;
-    private final int retryDelay;
-    private final ProxyConfig proxy;
+    private static final int RESTORER_TIMEOUT_MILLIS = 30000;
+    private static final int RESTORER_RETRY_COUNT = 3;
+    private static final long RESTORER_RETRY_DELAY_MILLIS = 1000L;
 
-    public static SkinRestorerConfig read(CommentedConfigurationNode node) throws SerializationException, ConfException {
-        RestorerType restorer = node.node("restorer").get(RestorerType.class, RestorerType.OFF);
-        Method method = node.node("method").get(Method.class, Method.URL);
-        int timeout = node.node("timeout").getInt(10000);
-        int retry = node.node("retry").getInt(2);
-        int retryDelay = node.node("retryDelay").getInt(5000);
-        ProxyConfig proxy = ProxyConfig.read(node.node("proxy"));
+    private final boolean enabled;
+    private final int timeout = RESTORER_TIMEOUT_MILLIS;
+    private final int retry = RESTORER_RETRY_COUNT;
+    private final long retryDelay = RESTORER_RETRY_DELAY_MILLIS;
 
-        return new SkinRestorerConfig(restorer, method, timeout, retry, retryDelay, proxy);
-    }
-
-    public enum RestorerType {
-        OFF, LOGIN, ASYNC
-    }
-
-    public enum Method {
-        URL, UPLOAD
+    public static SkinRestorerConfig read(CommentedConfigurationNode node) {
+        return new SkinRestorerConfig(node.getBoolean(false));
     }
 }

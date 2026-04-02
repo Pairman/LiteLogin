@@ -5,7 +5,7 @@ import org.eu.pnxlr.git.litelogin.api.internal.logger.Level;
 import org.jetbrains.annotations.ApiStatus;
 
 /**
- * 空日志程序桥接
+ * No-op logger bridge.
  */
 @ApiStatus.Internal
 @NoArgsConstructor

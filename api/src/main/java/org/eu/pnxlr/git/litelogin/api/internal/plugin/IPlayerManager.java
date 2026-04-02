@@ -6,39 +6,39 @@ import java.util.Set;
 import java.util.UUID;
 
 /**
- * 公共玩家管理器对象
+ * Shared player manager abstraction.
  */
 @ApiStatus.Internal
 public interface IPlayerManager {
 
     /**
-     * 以给定的名称返回在线的玩家
+     * Returns online players by the given name.
      *
-     * @param name 给定的名称
-     * @return 玩家执行者对象列表
+     * @param name the given name
+     * @return player sender objects
      */
     Set<IPlayer> getPlayers(String name);
 
     /**
-     * 以给定的唯一标识符返回在线的玩家
+     * Returns the online player by the given unique identifier.
      *
-     * @param uuid 给定的唯一标识符
-     * @return 玩家执行者对象
+     * @param uuid the given unique identifier
+     * @return player sender object
      */
     IPlayer getPlayer(UUID uuid);
 
     /**
-     * 获得当前所有在线的玩家列表
+     * Returns the list of all currently online players.
      *
-     * @return 在线玩家列表
+     * @return online player list
      */
     Set<IPlayer> getOnlinePlayers();
 
     /**
-     * 踢出玩家，如果这名玩家存在的话
+     * Kicks the player if the player exists.
      *
-     * @param name    玩家名称
-     * @param message 踢出信息
+     * @param name    player name
+     * @param message kick message
      */
     default void kickPlayerIfOnline(String name, String message) {
         for (IPlayer player : getPlayers(name)) {
@@ -53,10 +53,10 @@ public interface IPlayerManager {
     }
 
     /**
-     * 踢出玩家，如果这名玩家存在的话
+     * Kicks the player if the player exists.
      *
-     * @param uuid    玩家UUID
-     * @param message 踢出信息
+     * @param uuid    player UUID
+     * @param message kick message
      */
     default void kickPlayerIfOnline(UUID uuid, String message) {
         IPlayer player = getPlayer(uuid);
@@ -66,10 +66,10 @@ public interface IPlayerManager {
     }
 
     /**
-     * 判断玩家是否在线
+     * Checks whether the player is online.
      *
-     * @param redirectUuid 玩家的UUID
-     * @return 玩家是否在线
+     * @param redirectUuid player UUID
+     * @return whether the player is online
      */
     default boolean hasOnline(UUID redirectUuid) {
         return getPlayer(redirectUuid) != null;

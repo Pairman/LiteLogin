@@ -5,15 +5,15 @@ import lombok.Getter;
 import org.jetbrains.annotations.ApiStatus;
 
 /**
- * 表示一个通讯结果
+ * Represents a handler result.
  */
 @Getter
 @ApiStatus.Internal
 @AllArgsConstructor
 public class HandleResult {
-    // 通讯结果类型
+    // Handler result type
     private final Type type;
-    // 如果踢出，显示踢出消息
+    // Kick message to display when the player is disconnected
     private final String kickMessage;
 
     public enum Type {

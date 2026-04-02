@@ -25,10 +25,10 @@ public class ChatSessionHandler extends ChannelDuplexHandler {
             ByteBuf c = buffer.asReadOnly();
             c.markReaderIndex();
             try {
-                int packetId = c.readByte();
+                int packetId = ProtocolUtils.readVarInt(c);
                 ProtocolUtils.readUuid(c);
                 ProtocolUtils.readPlayerKey(player.getProtocolVersion(), c);
-                eventManager.fire(new NewChatSessionPacketIDEvent(packetId,player.getProtocolVersion(),player));
+                eventManager.fire(new NewChatSessionPacketIDEvent(packetId, player.getProtocolVersion()));
             } catch (Throwable ignore) { } finally {
                 c.resetReaderIndex();
             }

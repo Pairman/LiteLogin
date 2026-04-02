@@ -6,7 +6,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * 所有优先类加载器
+ * Fully prioritized class loader.
  */
 public class PriorAllURLClassLoader extends PriorURLClassLoader {
     static {

@@ -7,7 +7,7 @@ import lombok.ToString;
 import org.eu.pnxlr.git.litelogin.api.profile.GameProfile;
 
 /**
- * 游戏内验证结果
+ * In-game validation result.
  */
 @Getter
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
@@ -19,23 +19,23 @@ public class ValidateAuthenticationResult {
 
 
     /**
-     * 返回一个允许登录的结果
+     * Returns a result that allows login.
      */
     public static ValidateAuthenticationResult ofAllowed(GameProfile response) {
         return new ValidateAuthenticationResult(Reason.ALLOWED, response, null);
     }
 
     /**
-     * 返回一个不允许登录的结果
+     * Returns a result that disallows login.
      */
     public static ValidateAuthenticationResult ofDisallowed(String disallowedMessage) {
         return new ValidateAuthenticationResult(Reason.DISALLOWED, null, disallowedMessage);
     }
 
     public enum Reason {
-        // 允许登录
+        // Login allowed
         ALLOWED,
-        // 不允许登录
+        // Login disallowed
         DISALLOWED;
     }
 }

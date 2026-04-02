@@ -7,7 +7,7 @@ import org.eu.pnxlr.git.litelogin.velocity.impl.VelocitySender;
 import java.util.List;
 
 /**
- * Velocity 的指令处理程序
+ * Velocity command handler.
  */
 public class CommandHandler {
     private final LiteLoginVelocity plugin;

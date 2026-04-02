@@ -1,14 +1,13 @@
 package org.eu.pnxlr.git.litelogin.loader.classloader;
 
 import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.HashSet;
 import java.util.Set;
 
 /**
- * 优先类加载器
+ * Priority class loader.
  */
-public class PriorURLClassLoader extends URLClassLoader implements IExtURLClassLoader {
+public class PriorURLClassLoader extends java.net.URLClassLoader {
     static {
         registerAsParallelCapable();
     }
@@ -20,7 +19,6 @@ public class PriorURLClassLoader extends URLClassLoader implements IExtURLClassL
         this.packageName = new HashSet<>(packageName);
     }
 
-    @Override
     public Class<?> defineClass(String name, byte[] bytes) {
         return defineClass(name, bytes, 0, bytes.length);
     }
@@ -43,14 +41,8 @@ public class PriorURLClassLoader extends URLClassLoader implements IExtURLClassL
         return super.loadClass(name, resolve);
     }
 
-    @Override
     public void addURL(URL url) {
         super.addURL(url);
-    }
-
-    @Override
-    public URLClassLoader self() {
-        return this;
     }
 
     public boolean containPrior(String name) {

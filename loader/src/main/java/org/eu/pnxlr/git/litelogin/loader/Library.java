@@ -1,10 +1,10 @@
-package org.eu.pnxlr.git.litelogin.loader.library;
+package org.eu.pnxlr.git.litelogin.loader;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
 /**
- * 代表一个依赖
+ * Represents a dependency.
  */
 @AllArgsConstructor
 @Data

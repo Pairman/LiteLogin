@@ -1,0 +1,7 @@
+# Minimal Official service example.
+# See template.yml for all supported options.
+# Please edit before usage.
+
+id: -1
+name: Official
+officialSessionServer: https://sessionserver.mojang.com

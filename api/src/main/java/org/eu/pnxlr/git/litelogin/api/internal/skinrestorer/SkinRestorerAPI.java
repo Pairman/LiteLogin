@@ -7,7 +7,7 @@ import org.jetbrains.annotations.ApiStatus;
 public interface SkinRestorerAPI {
 
     /**
-     * 进行皮肤修复
+     * Performs skin restoration.
      */
     SkinRestorerResult doRestorer(AuthResult result);
 

@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import java.util.Objects;
 
 /**
- * 用户配置
+ * Profile property.
  */
 @Data
 @AllArgsConstructor

@@ -6,7 +6,7 @@ import org.eu.pnxlr.git.litelogin.api.internal.logger.bridges.ConsoleBridge;
 import org.jetbrains.annotations.ApiStatus;
 
 /**
- * 日志提供程序
+ * Logger provider.
  */
 @ApiStatus.Internal
 public class LoggerProvider {

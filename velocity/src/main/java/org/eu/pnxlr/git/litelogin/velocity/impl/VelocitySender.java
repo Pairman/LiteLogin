@@ -8,7 +8,7 @@ import org.eu.pnxlr.git.litelogin.api.internal.plugin.ISender;
 import net.kyori.adventure.text.Component;
 
 /**
- * Velocity 指令执行者对象
+ * Velocity command sender wrapper.
  */
 public class VelocitySender implements ISender {
     private final CommandSource commandSource;

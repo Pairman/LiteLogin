@@ -1,19 +1,19 @@
 package org.eu.pnxlr.git.litelogin.core.configuration.service.yggdrasil;
 
+import java.io.IOException;
+
 import org.eu.pnxlr.git.litelogin.api.service.ServiceType;
-import org.eu.pnxlr.git.litelogin.core.configuration.ConfException;
-import org.eu.pnxlr.git.litelogin.core.configuration.ProxyConfig;
 import org.eu.pnxlr.git.litelogin.core.configuration.SkinRestorerConfig;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * 正版官方 Yggdrasil
+ * Official Yggdrasil service.
  */
 public class OfficialYggdrasilServiceConfig extends BaseYggdrasilServiceConfig {
     private final String customSessionServer;
 
-    public OfficialYggdrasilServiceConfig(int id, String name, InitUUID initUUID, String initNameFormat, boolean whitelist, SkinRestorerConfig skinRestorer, boolean trackIp, int timeout, int retry, long retryDelay, ProxyConfig authProxy, String customSessionServer) throws ConfException {
-        super(id, name, initUUID, initNameFormat, whitelist, skinRestorer, trackIp, timeout, retry, retryDelay, authProxy);
+    public OfficialYggdrasilServiceConfig(int id, String name, boolean whitelist, SkinRestorerConfig skinRestorer, boolean trackIp, String customSessionServer) throws IOException {
+        super(id, name, whitelist, skinRestorer, trackIp);
         if (!customSessionServer.endsWith("/")) {
             customSessionServer = customSessionServer.concat("/");
         }
@@ -28,18 +28,8 @@ public class OfficialYggdrasilServiceConfig extends BaseYggdrasilServiceConfig {
     }
 
     @Override
-    protected String getAuthPostContent() {
-        throw new UnsupportedOperationException("get post content");
-    }
-
-    @Override
     protected String getAuthTrackIpContent() {
         return "&ip={0}";
-    }
-
-    @Override
-    public HttpRequestMethod getHttpRequestMethod() {
-        return HttpRequestMethod.GET;
     }
 
     @NotNull

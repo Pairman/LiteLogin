@@ -9,7 +9,7 @@ import org.eu.pnxlr.git.litelogin.api.internal.logger.LoggerProvider;
 import org.eu.pnxlr.git.litelogin.api.internal.skinrestorer.SkinRestorerResult;
 
 /**
- * 皮肤修复结果
+ * Skin restoration result.
  */
 @Getter
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
@@ -45,10 +45,6 @@ public class SkinRestorerResultImpl implements SkinRestorerResult {
 
     public static SkinRestorerResultImpl ofBadSkin(Throwable throwable) {
         return new SkinRestorerResultImpl(Reason.BAD_SKIN, null, throwable);
-    }
-
-    public static SkinRestorerResultImpl ofRestorerFailed(Throwable throwable) {
-        return new SkinRestorerResultImpl(Reason.RESTORER_FAILED, null, throwable);
     }
 
     public static void handleSkinRestoreResult(Throwable throwable) {

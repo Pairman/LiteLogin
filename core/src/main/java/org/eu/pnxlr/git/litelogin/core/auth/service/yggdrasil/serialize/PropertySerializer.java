@@ -8,7 +8,7 @@ import org.eu.pnxlr.git.litelogin.core.auth.service.yggdrasil.UnmodifiableGamePr
 import java.lang.reflect.Type;
 
 /**
- * Property 的 GSON 序列化程序
+ * Gson serializer for Property.
  */
 @NoArgsConstructor
 public class PropertySerializer implements JsonSerializer<Property>, JsonDeserializer<Property> {

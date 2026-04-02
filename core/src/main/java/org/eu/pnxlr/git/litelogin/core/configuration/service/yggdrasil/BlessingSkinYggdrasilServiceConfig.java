@@ -1,19 +1,19 @@
 package org.eu.pnxlr.git.litelogin.core.configuration.service.yggdrasil;
 
+import java.io.IOException;
+
 import org.eu.pnxlr.git.litelogin.api.service.ServiceType;
-import org.eu.pnxlr.git.litelogin.core.configuration.ConfException;
-import org.eu.pnxlr.git.litelogin.core.configuration.ProxyConfig;
 import org.eu.pnxlr.git.litelogin.core.configuration.SkinRestorerConfig;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Blessing Skin 皮肤站 Yggdrasil
+ * Blessing Skin Yggdrasil service.
  */
 public class BlessingSkinYggdrasilServiceConfig extends BaseYggdrasilServiceConfig {
     private final String apiRoot;
 
-    public BlessingSkinYggdrasilServiceConfig(int id, String name, InitUUID initUUID, String initNameFormat, boolean whitelist, SkinRestorerConfig skinRestorer, boolean trackIp, int timeout, int retry, long retryDelay, ProxyConfig authProxy, String apiRoot) throws ConfException {
-        super(id, name, initUUID,initNameFormat, whitelist, skinRestorer, trackIp, timeout, retry, retryDelay, authProxy);
+    public BlessingSkinYggdrasilServiceConfig(int id, String name, boolean whitelist, SkinRestorerConfig skinRestorer, boolean trackIp, String apiRoot) throws IOException {
+        super(id, name, whitelist, skinRestorer, trackIp);
         if (!apiRoot.endsWith("/")) {
             apiRoot = apiRoot.concat("/");
         }
@@ -32,18 +32,8 @@ public class BlessingSkinYggdrasilServiceConfig extends BaseYggdrasilServiceConf
     }
 
     @Override
-    protected String getAuthPostContent() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     protected String getAuthTrackIpContent() {
         return "&ip={0}";
-    }
-
-    @Override
-    public HttpRequestMethod getHttpRequestMethod() {
-        return HttpRequestMethod.GET;
     }
 
     @NotNull

@@ -3,30 +3,23 @@ package org.eu.pnxlr.git.litelogin.core.auth.validate.entry;
 import org.eu.pnxlr.git.litelogin.api.internal.util.Pair;
 import org.eu.pnxlr.git.litelogin.api.internal.util.ValueUtil;
 import org.eu.pnxlr.git.litelogin.core.auth.validate.ValidateContext;
-import org.eu.pnxlr.git.litelogin.core.main.Core;
-
 import java.util.regex.Pattern;
 
 /**
- * 玩家名字正则检查器
+ * Player name regex validator.
  */
-public class NameAllowedRegularCheckStep {
-    private final Core core;
-
-    public NameAllowedRegularCheckStep(Core core) {
-        this.core = core;
-    }
+public class NameAllowedRegexCheckStep {
+    private static final String NAME_ALLOWED_REGEX = "^[a-zA-Z0-9_]+$";
 
     public boolean run(ValidateContext validateContext) {
-        String nameAllowedRegular = core.getPluginConfig().getNameAllowedRegular();
-        if (ValueUtil.isEmpty(nameAllowedRegular)) {
+        if (ValueUtil.isEmpty(NAME_ALLOWED_REGEX)) {
             return true;
         }
-        if (!Pattern.matches(nameAllowedRegular, validateContext.getBaseServiceAuthenticationResult().getResponse().getName())) {
+        if (!Pattern.matches(NAME_ALLOWED_REGEX, validateContext.getBaseServiceAuthenticationResult().getResponse().getName())) {
             validateContext.setDisallowMessage(org.eu.pnxlr.git.litelogin.api.internal.util.ValueUtil.transPapi(
-                    "§cYour username §e{name}§c does not match the required pattern §e{regular}§c.",
+                    "Your username {name} does not match the required pattern {regular}.",
                     new Pair<>("name", validateContext.getBaseServiceAuthenticationResult().getResponse().getName()),
-                    new Pair<>("regular", nameAllowedRegular)
+                    new Pair<>("regular", NAME_ALLOWED_REGEX)
             ));
             return false;
         }

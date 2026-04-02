@@ -11,8 +11,7 @@ import org.eu.pnxlr.git.litelogin.api.internal.skinrestorer.SkinRestorerAPI;
 import org.eu.pnxlr.git.litelogin.api.internal.util.Pair;
 import org.eu.pnxlr.git.litelogin.api.internal.util.ValueUtil;
 import org.eu.pnxlr.git.litelogin.core.auth.LoginAuthResult;
-import org.eu.pnxlr.git.litelogin.core.configuration.SkinRestorerConfig;
-import org.eu.pnxlr.git.litelogin.core.configuration.service.BaseServiceConfig;
+import org.eu.pnxlr.git.litelogin.core.configuration.BaseServiceConfig;
 import org.eu.pnxlr.git.litelogin.core.main.Core;
 import org.eu.pnxlr.git.litelogin.core.ohc.LoggingInterceptor;
 import org.eu.pnxlr.git.litelogin.core.ohc.RetryInterceptor;
@@ -28,7 +27,7 @@ import java.util.Base64;
 import java.util.Map;
 
 /**
- * 皮肤修复程序核心
+ * Skin restoration core.
  */
 public class SkinRestorerCore implements SkinRestorerAPI {
     private static final String[] ALLOWED_DOMAINS = new String[]{".minecraft.net", ".mojang.com"};
@@ -53,7 +52,7 @@ public class SkinRestorerCore implements SkinRestorerAPI {
     }
 
     /**
-     * 判断材质签名是否有效
+     * Checks whether the texture signature is valid.
      */
     private static boolean isSignatureValid(String value, String signatureValue) throws InvalidKeyException, NoSuchAlgorithmException, SignatureException {
         Signature signature = Signature.getInstance("SHA1withRSA");
@@ -63,7 +62,7 @@ public class SkinRestorerCore implements SkinRestorerAPI {
     }
 
     /**
-     * 判断材质URL白名单
+     * Checks whether the texture URL is allowed.
      */
     private static boolean isAllowedTextureDomain(String url) {
         try {
@@ -88,7 +87,7 @@ public class SkinRestorerCore implements SkinRestorerAPI {
     }
 
     /**
-     * 进行修复
+     * Performs restoration.
      */
     @SneakyThrows
     public SkinRestorerResultImpl doRestorer(AuthResult result0) {
@@ -102,11 +101,9 @@ public class SkinRestorerCore implements SkinRestorerAPI {
                 .writeTimeout(Duration.ofMillis(serviceConfig.getSkinRestorer().getTimeout()))
                 .readTimeout(Duration.ofMillis(serviceConfig.getSkinRestorer().getTimeout()))
                 .connectTimeout(Duration.ofMillis(serviceConfig.getSkinRestorer().getTimeout()))
-                .proxy(serviceConfig.getSkinRestorer().getProxy().getProxy())
-                .proxyAuthenticator(serviceConfig.getSkinRestorer().getProxy().getProxyAuthenticator())
                 .build();
 
-        if (serviceConfig.getSkinRestorer().getRestorer() == SkinRestorerConfig.RestorerType.OFF) {
+        if (!serviceConfig.getSkinRestorer().isEnabled()) {
             return SkinRestorerResultImpl.ofNoRestorer();
         }
         Map<String, Property> propertyMap = profile.getPropertyMap();
@@ -148,17 +145,14 @@ public class SkinRestorerCore implements SkinRestorerAPI {
             }
         }
 
-        SkinRestorerTask skinRestorerTask = new SkinRestorerTask(core, serviceConfig, okHttpClient, url, model, profile);
-        if (serviceConfig.getSkinRestorer().getRestorer() == SkinRestorerConfig.RestorerType.ASYNC) {
-            core.getPlugin().getRunServer().getScheduler().runTaskAsync(() -> {
-                try {
-                    SkinRestorerResultImpl.handleSkinRestoreResult(skinRestorerTask.call());
-                } catch (Exception e) {
-                    SkinRestorerResultImpl.handleSkinRestoreResult(e);
-                }
-            });
-            return SkinRestorerResultImpl.ofRestorerAsync();
-        }
-        return skinRestorerTask.call();
+        SkinRestorerTask skinRestorerTask = new SkinRestorerTask(core, okHttpClient, url, model, profile);
+        core.getPlugin().getRunServer().getScheduler().runTaskAsync(() -> {
+            try {
+                SkinRestorerResultImpl.handleSkinRestoreResult(skinRestorerTask.call());
+            } catch (Exception e) {
+                SkinRestorerResultImpl.handleSkinRestoreResult(e);
+            }
+        });
+        return SkinRestorerResultImpl.ofRestorerAsync();
     }
 }

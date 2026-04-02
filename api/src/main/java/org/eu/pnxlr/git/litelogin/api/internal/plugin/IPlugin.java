@@ -8,23 +8,23 @@ import java.io.File;
 public interface IPlugin {
 
     /**
-     * 获得配置和数据文件路径
+     * Returns the config and data directory.
      *
-     * @return 配置和数据文件路径
+     * @return the config and data directory
      */
     File getDataFolder();
 
     /**
-     * 获得临时目录文件夹
+     * Returns the temporary directory.
      *
-     * @return 临时目录文件夹
+     * @return the temporary directory
      */
     File getTempFolder();
 
     /**
-     * 获得服务器对象
+     * Returns the server instance.
      *
-     * @return 服务器对象
+     * @return the server instance
      */
     IServer getRunServer();
 }

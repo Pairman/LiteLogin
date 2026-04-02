@@ -10,7 +10,7 @@ import org.eu.pnxlr.git.litelogin.api.internal.plugin.ISender;
 import org.eu.pnxlr.git.litelogin.api.internal.plugin.IServer;
 
 /**
- * Velocity 服务器对象
+ * Velocity server wrapper.
  */
 public class VelocityServer implements IServer {
     private final ProxyServer server;
@@ -19,7 +19,7 @@ public class VelocityServer implements IServer {
 
     public VelocityServer(ProxyServer server) {
         this.server = server;
-        this.scheduler = new VelocityScheduler();
+        this.scheduler = new BaseScheduler();
         this.playerManager = new VelocityPlayerManager(server);
     }
 

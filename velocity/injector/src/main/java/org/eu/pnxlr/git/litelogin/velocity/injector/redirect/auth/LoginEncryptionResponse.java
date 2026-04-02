@@ -26,7 +26,7 @@ public class LoginEncryptionResponse extends EncryptionResponsePacket {
             loginSessionHandler.handle(this);
         } catch (Throwable e) {
             if (loginSessionHandler.isEncrypted()) {
-                loginSessionHandler.getInbound().disconnect(Component.text("§cAn exception occurred while handling the login request. Please contact the server administrator."));
+                loginSessionHandler.getInbound().disconnect(Component.text("An exception occurred while handling the login request. Please contact the server administrator."));
             }
             loginSessionHandler.getMcConnection().close(true);
             LoggerProvider.getLogger().error("An exception occurred while processing a login request.", e);

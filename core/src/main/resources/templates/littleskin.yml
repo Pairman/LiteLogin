@@ -1,0 +1,7 @@
+# Minimal LittleSkin service example.
+# See template.yml for all supported options.
+# Please edit before usage.
+
+id: -1
+name: LittleSkin
+blessingSkinApiRoot: https://littleskin.cn/api/yggdrasil

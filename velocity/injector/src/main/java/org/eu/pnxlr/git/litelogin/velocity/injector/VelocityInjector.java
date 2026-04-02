@@ -9,7 +9,6 @@ import io.netty.util.collection.IntObjectMap;
 import org.eu.pnxlr.git.litelogin.api.internal.injector.Injector;
 import org.eu.pnxlr.git.litelogin.api.internal.logger.LoggerProvider;
 import org.eu.pnxlr.git.litelogin.api.internal.main.CoreAPI;
-import org.eu.pnxlr.git.litelogin.api.internal.util.reflect.NoSuchEnumException;
 import org.eu.pnxlr.git.litelogin.api.internal.util.reflect.ReflectUtil;
 import org.eu.pnxlr.git.litelogin.velocity.injector.handler.InitialLoginSessionHandlerBridge;
 import org.eu.pnxlr.git.litelogin.velocity.injector.redirect.auth.LoginEncryptionResponse;
@@ -32,13 +31,13 @@ import static com.velocitypowered.api.network.ProtocolVersion.SUPPORTED_VERSIONS
 public class VelocityInjector implements Injector {
 
     @Override
-    public void inject(CoreAPI coreApi) throws NoSuchFieldException, ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, NoSuchEnumException {
+    public void inject(CoreAPI coreApi) throws NoSuchFieldException, ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, ReflectiveOperationException {
         InitialLoginSessionHandlerBridge.init();
         // auth
         {
             StateRegistry.PacketRegistry serverbound = getServerboundPacketRegistry(StateRegistry.LOGIN);
             redirectInput(serverbound, EncryptionResponsePacket.class, () -> new LoginEncryptionResponse(coreApi));
-            redirectInput(serverbound, ServerLoginPacket.class, () -> new LoginServerPacket(coreApi));
+            redirectInput(serverbound, ServerLoginPacket.class, () -> new LoginServerPacket());
         }
     }
 
@@ -105,26 +104,6 @@ public class VelocityInjector implements Injector {
                     map$entry$setValueMethod.invoke(e, supplierRedirect);
                 }
             }
-        }
-    }
-
-    /**
-     * 追加注册出口包
-     *
-     * @param bound         数据包方向
-     * @param originalClass 原始数据包类对象
-     * @param appendClass   追加的数据包类对象
-     */
-    private <T> void redirectOutput(StateRegistry.PacketRegistry bound, Class<T> originalClass, Class<? extends T> appendClass) throws NoSuchFieldException, InvocationTargetException, IllegalAccessException, NoSuchMethodException {
-        Field f$packetClassToId = StateRegistry.PacketRegistry.ProtocolRegistry.class.getDeclaredField("packetClassToId");
-        ReflectUtil.handleAccessible(f$packetClassToId);
-
-        Method map$putMethod = Map.class.getMethod("put", Object.class, Object.class);
-
-        for (Object protocolRegistry : getProtocolRegistries(bound)) {
-            Map<?, ?> packetClassToId = (Map<?, ?>) f$packetClassToId.get(protocolRegistry);// Object2IntMap<Class<? extends MinecraftPacket>>
-            if (!packetClassToId.containsKey(originalClass)) continue;
-            map$putMethod.invoke(packetClassToId, appendClass, packetClassToId.get(originalClass));
         }
     }
 

@@ -3,11 +3,11 @@ package org.eu.pnxlr.git.litelogin.core.auth.service.yggdrasil;
 import lombok.Getter;
 import lombok.ToString;
 import org.eu.pnxlr.git.litelogin.api.profile.GameProfile;
-import org.eu.pnxlr.git.litelogin.core.auth.service.BaseServiceAuthenticationResult;
+import org.eu.pnxlr.git.litelogin.core.auth.BaseServiceAuthenticationResult;
 import org.eu.pnxlr.git.litelogin.core.configuration.service.yggdrasil.BaseYggdrasilServiceConfig;
 
 /**
- * HasJoined 验证结果
+ * HasJoined authentication result.
  */
 @Getter
 @ToString
@@ -20,28 +20,28 @@ public class YggdrasilAuthenticationResult extends BaseServiceAuthenticationResu
     }
 
     /**
-     * 提供一个允许登录的结果
+     * Creates a result that allows login.
      */
     protected static YggdrasilAuthenticationResult ofAllowed(GameProfile response, BaseYggdrasilServiceConfig serviceConfig) {
         return new YggdrasilAuthenticationResult(Reason.ALLOWED, response, serviceConfig);
     }
 
     /**
-     * 提供一个服务器宕机的结果
+     * Creates a result for server outage.
      */
     protected static YggdrasilAuthenticationResult ofServerBreakdown() {
         return new YggdrasilAuthenticationResult(Reason.SERVER_BREAKDOWN, null, null);
     }
 
     /**
-     * 提供一个验证失败的结果
+     * Creates a result for authentication failure.
      */
     protected static YggdrasilAuthenticationResult ofValidationFailed() {
         return new YggdrasilAuthenticationResult(Reason.VALIDATION_FAILED, null, null);
     }
 
     /**
-     * 提供一个没有验证服务器的结果
+     * Creates a result for the case where no authentication service is configured.
      */
     protected static YggdrasilAuthenticationResult ofNoService() {
         return new YggdrasilAuthenticationResult(Reason.NO_SERVICE, null, null);
@@ -53,13 +53,13 @@ public class YggdrasilAuthenticationResult extends BaseServiceAuthenticationResu
     }
 
     public enum Reason {
-        // 通过
+        // Allowed
         ALLOWED,
-        // 服务器宕机或破坏
+        // Server outage or invalid response
         SERVER_BREAKDOWN,
-        // 验证失败
+        // Authentication failed
         VALIDATION_FAILED,
-        // 没有验证服务器
+        // No authentication service configured
         NO_SERVICE;
     }
 }

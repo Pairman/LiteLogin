@@ -1,8 +1,6 @@
 package org.eu.pnxlr.git.litelogin.core.configuration;
 
-import lombok.Getter;
 import lombok.ToString;
-import org.eu.pnxlr.git.litelogin.api.MapperConfigAPI;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.ConfigurationNode;
@@ -12,15 +10,15 @@ import java.io.File;
 import java.util.*;
 
 /**
- * ChatSessionBlocker 数据包映射配置
+ * ChatSessionBlocker packet mapping configuration.
  */
-@Getter
 @ToString
-public class MapperConfig implements MapperConfigAPI {
+final class MapperConfig {
+    private static final int MINIMUM_MAPPED_PROTOCOL = 761;
     private final TreeMap<Integer,Integer> packetMapping = new TreeMap<>() {
         @Override
         public Integer put(Integer key, Integer value) {
-            if(key<761) return value;
+            if(key<MINIMUM_MAPPED_PROTOCOL) return value;
             if(this.containsValue(value)) {
                 Integer existingKey = findKeyByValue(value);
                 if (existingKey != null && existingKey > key) {
@@ -39,22 +37,30 @@ public class MapperConfig implements MapperConfigAPI {
             }
             return null;
         }
-        {
-            put(761,0x20);
-            put(762,0x06);
-            put(765,0x07);
-            put(768,0x08);
-            put(771,0x09);
-        }
     };
+    private final Map<Integer, Integer> packetMappingView = Collections.unmodifiableNavigableMap(packetMapping);
 
     private final File dataFolder;
     MapperConfig(File dataFolder) {
         this.dataFolder = dataFolder;
+        loadDefaults();
     }
 
-    @Override
-    public void save() {
+    public Map<Integer, Integer> getPacketMapping() {
+        return packetMappingView;
+    }
+
+    public boolean persistPacketMapping(int protocol, int packetId) {
+        Map<Integer, Integer> oldMapping = new TreeMap<>(packetMapping);
+        packetMapping.put(protocol, packetId);
+        if (packetMapping.equals(oldMapping)) {
+            return false;
+        }
+        save();
+        return true;
+    }
+
+    private void save() {
         try {
             YamlConfigurationLoader loader = YamlConfigurationLoader.builder().file(new File(dataFolder, "mapper.yml")).indent(2).build();
             CommentedConfigurationNode rootNode = loader.load();
@@ -68,10 +74,10 @@ public class MapperConfig implements MapperConfigAPI {
         }
     }
 
-    @Override
-    public void reload() {
+    void reload() {
         YamlConfigurationLoader loader = YamlConfigurationLoader.builder().file(new File(dataFolder, "mapper.yml")).build();
         try {
+            loadDefaults();
             ConfigurationNode mapperNode = loader.load().node("mapper");
             for (Map.Entry<Object, ? extends ConfigurationNode> entry : mapperNode.childrenMap().entrySet()) {
                 String key = entry.getKey().toString();
@@ -84,5 +90,14 @@ public class MapperConfig implements MapperConfigAPI {
         } catch (ConfigurateException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private void loadDefaults() {
+        packetMapping.clear();
+        packetMapping.put(761,0x20);
+        packetMapping.put(762,0x06);
+        packetMapping.put(765,0x07);
+        packetMapping.put(768,0x08);
+        packetMapping.put(771,0x09);
     }
 }

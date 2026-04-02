@@ -1,6 +1,7 @@
 package org.eu.pnxlr.git.litelogin.core.auth.service.yggdrasil;
 
 import org.eu.pnxlr.git.litelogin.api.profile.GameProfile;
+import org.eu.pnxlr.git.litelogin.api.internal.main.LiteLoginConstants;
 import org.eu.pnxlr.git.litelogin.api.internal.util.Pair;
 import org.eu.pnxlr.git.litelogin.core.configuration.service.yggdrasil.BaseYggdrasilServiceConfig;
 import org.eu.pnxlr.git.litelogin.core.main.Core;
@@ -9,7 +10,6 @@ import org.eu.pnxlr.git.litelogin.core.ohc.RetryInterceptor;
 import okhttp3.*;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Objects;
 
@@ -31,27 +31,14 @@ public class YggdrasilAuthenticationTask {
         this.config = config;
     }
 
-    // 进行验证
+    // Perform authentication
     public GameProfile call() throws Exception {
         String url = config.generateAuthURL(username, serverId, ip);
-
-        if (config.getHttpRequestMethod() == BaseYggdrasilServiceConfig.HttpRequestMethod.GET) {
-            return call0(config, new Request.Builder()
-                    .get()
-                    .url(url)
-                    .header("User-Agent", core.getHttpRequestHeaderUserAgent())
-                    .build());
-        } else if (config.getHttpRequestMethod() == BaseYggdrasilServiceConfig.HttpRequestMethod.POST) {
-            return call0(config, new Request.Builder()
-                    .post(RequestBody.create(
-                            config.generateAuthPostContent(username, serverId, ip).getBytes(StandardCharsets.UTF_8)
-                    ))
-                    .url(url)
-                    .header("User-Agent", core.getHttpRequestHeaderUserAgent())
-                    .header("Content-Type", "application/json")
-                    .build());
-        }
-        throw new UnsupportedOperationException("HttpRequestMethod");
+        return call0(config, new Request.Builder()
+                .get()
+                .url(url)
+                .header("User-Agent", LiteLoginConstants.HTTP_USER_AGENT)
+                .build());
     }
 
 
@@ -62,8 +49,6 @@ public class YggdrasilAuthenticationTask {
                 .writeTimeout(Duration.ofMillis(config.getTimeout()))
                 .readTimeout(Duration.ofMillis(config.getTimeout()))
                 .connectTimeout(Duration.ofMillis(config.getTimeout()))
-                .proxy(config.getAuthProxy().getProxy())
-                .proxyAuthenticator(config.getAuthProxy().getProxyAuthenticator())
                 .build();
         Call call = client.newCall(request);
         try (Response execute = call.execute()) {

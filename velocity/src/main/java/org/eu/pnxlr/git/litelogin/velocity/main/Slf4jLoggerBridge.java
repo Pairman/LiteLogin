@@ -1,11 +1,11 @@
-package org.eu.pnxlr.git.litelogin.velocity.logger;
+package org.eu.pnxlr.git.litelogin.velocity.main;
 
 import org.eu.pnxlr.git.litelogin.api.internal.logger.Level;
 import org.eu.pnxlr.git.litelogin.api.internal.logger.bridges.BaseLoggerBridge;
 import org.slf4j.Logger;
 
 /**
- * Slf4J 日志桥接程序
+ * Slf4J logger bridge.
  */
 public class Slf4jLoggerBridge extends BaseLoggerBridge {
     private final Logger logger;

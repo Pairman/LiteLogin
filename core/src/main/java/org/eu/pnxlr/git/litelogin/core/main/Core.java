@@ -3,10 +3,10 @@ package org.eu.pnxlr.git.litelogin.core.main;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import lombok.Getter;
-import org.eu.pnxlr.git.litelogin.api.MapperConfigAPI;
 import org.eu.pnxlr.git.litelogin.api.LiteLoginAPI;
 import org.eu.pnxlr.git.litelogin.api.LiteLoginAPIProvider;
 import org.eu.pnxlr.git.litelogin.api.data.LiteLoginPlayerData;
+import org.eu.pnxlr.git.litelogin.api.internal.main.LiteLoginConstants;
 import org.eu.pnxlr.git.litelogin.api.profile.GameProfile;
 import org.eu.pnxlr.git.litelogin.api.profile.Property;
 import org.eu.pnxlr.git.litelogin.api.internal.logger.LoggerProvider;
@@ -16,11 +16,9 @@ import org.eu.pnxlr.git.litelogin.core.auth.AuthHandler;
 import org.eu.pnxlr.git.litelogin.core.auth.service.yggdrasil.serialize.GameProfileSerializer;
 import org.eu.pnxlr.git.litelogin.core.auth.service.yggdrasil.serialize.PropertySerializer;
 import org.eu.pnxlr.git.litelogin.core.command.CommandHandler;
-import org.eu.pnxlr.git.litelogin.core.configuration.MapperConfig;
 import org.eu.pnxlr.git.litelogin.core.configuration.PluginConfig;
-import org.eu.pnxlr.git.litelogin.core.configuration.service.BaseServiceConfig;
+import org.eu.pnxlr.git.litelogin.core.configuration.BaseServiceConfig;
 import org.eu.pnxlr.git.litelogin.core.database.SQLManager;
-import org.eu.pnxlr.git.litelogin.core.handle.CacheWhitelistHandler;
 import org.eu.pnxlr.git.litelogin.core.handle.PlayerHandler;
 import org.eu.pnxlr.git.litelogin.core.skinrestorer.SkinRestorerCore;
 import org.jetbrains.annotations.NotNull;
@@ -31,11 +29,14 @@ import java.net.URISyntaxException;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * LiteLogin核心
+ * LiteLogin core.
  */
 public class Core implements CoreAPI, LiteLoginAPI {
     @Getter
@@ -53,24 +54,21 @@ public class Core implements CoreAPI, LiteLoginAPI {
     @Getter
     private final PlayerHandler playerHandler;
     @Getter
-    private final CacheWhitelistHandler cacheWhitelistHandler;
+    private final Set<String> cachedWhitelist = Collections.newSetFromMap(new ConcurrentHashMap<>());
     @Getter
     private final Gson gson;
-    @Getter
-    private final String httpRequestHeaderUserAgent = "LiteLogin/v2.0";
 
     /**
-     * 构建LiteLogin核心，这个方法将会被反射调用
+     * Constructs the LiteLogin core. This method will be invoked by reflection.
      */
     public Core(IPlugin plugin) {
         this.plugin = plugin;
-        this.pluginConfig = new PluginConfig(plugin.getDataFolder(), this);
+        this.pluginConfig = new PluginConfig(plugin.getDataFolder());
         this.sqlManager = new SQLManager(this);
         this.authHandler = new AuthHandler(this);
         this.skinRestorerHandler = new SkinRestorerCore(this);
         this.commandHandler = new CommandHandler(this);
         this.playerHandler = new PlayerHandler(this);
-        this.cacheWhitelistHandler = new CacheWhitelistHandler();
         this.gson = new GsonBuilder()
                 .setPrettyPrinting()
                 .registerTypeAdapter(GameProfile.class, new GameProfileSerializer())
@@ -78,7 +76,7 @@ public class Core implements CoreAPI, LiteLoginAPI {
     }
 
     /**
-     * 加载LiteLogin核心
+     * Loads the LiteLogin core.
      */
     @Override
     public void load() throws IOException, SQLException, ClassNotFoundException, URISyntaxException {
@@ -87,8 +85,7 @@ public class Core implements CoreAPI, LiteLoginAPI {
         Properties properties = new Properties();
         properties.load(getClass().getResourceAsStream("/build.properties"));
 
-        plugin.getRunServer().getConsoleSender().sendMessagePL(">>>>>> LiteLogin <<<<<<");
-
+        checkEnvironment();
         pluginConfig.reload();
         sqlManager.init();
         commandHandler.init();
@@ -97,7 +94,6 @@ public class Core implements CoreAPI, LiteLoginAPI {
                 String.format("Loaded LiteLogin v%s %s on %s - %s",
                         properties.getProperty("version"), properties.getProperty("build_type"),
                         plugin.getRunServer().getName(), plugin.getRunServer().getVersion()));
-        checkEnvironment();
     }
 
     private void checkEnvironment() {
@@ -118,7 +114,7 @@ public class Core implements CoreAPI, LiteLoginAPI {
     }
 
     /**
-     * 关闭LiteLogin核心
+     * Shuts down the LiteLogin core.
      */
     @Override
     public void close() {
@@ -126,8 +122,13 @@ public class Core implements CoreAPI, LiteLoginAPI {
     }
 
     @Override
-    public MapperConfigAPI getMapperConfig() {
-        return pluginConfig.getMapperConfig();
+    public Map<Integer, Integer> getPacketMapping() {
+        return pluginConfig.getPacketMapping();
+    }
+
+    @Override
+    public boolean persistPacketMapping(int protocol, int packetId) {
+        return pluginConfig.persistPacketMapping(protocol, packetId);
     }
 
     @NotNull

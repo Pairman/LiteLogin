@@ -4,26 +4,26 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * 表示一个验证服务器
+ * Represents an authentication service.
  */
 @ApiStatus.NonExtendable
 public interface IService {
 
     /**
-     * 返回这个验证服务ID
-     * @return 这个验证服务ID
+     * Returns this authentication service ID.
+     * @return this authentication service ID
      */
     int getServiceId();
 
     /**
-     * 返回验证服务名字
-     * @return 验证服务名字
+     * Returns the authentication service name.
+     * @return the authentication service name
      */
     @NotNull String getServiceName();
 
     /**
-     * 返回验证服务类型
-     * @return 验证服务类型
+     * Returns the authentication service type.
+     * @return the authentication service type
      */
     @NotNull ServiceType getServiceType();
 }

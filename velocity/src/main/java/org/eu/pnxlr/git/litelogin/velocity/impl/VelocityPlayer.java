@@ -3,18 +3,14 @@ package org.eu.pnxlr.git.litelogin.velocity.impl;
 import com.velocitypowered.api.proxy.Player;
 import org.eu.pnxlr.git.litelogin.velocity.main.LiteLoginVelocity;
 import org.eu.pnxlr.git.litelogin.api.internal.plugin.IPlayer;
-import org.eu.pnxlr.git.litelogin.api.internal.util.reflect.ReflectUtil;
 import net.kyori.adventure.text.Component;
 
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
-import java.lang.reflect.Field;
 import java.net.SocketAddress;
 import java.util.Objects;
 import java.util.UUID;
 
 /**
- * Velocity 玩家对象
+ * Velocity player wrapper.
  */
 public class VelocityPlayer extends VelocitySender implements IPlayer {
     private final Player player;

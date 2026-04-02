@@ -6,87 +6,67 @@ import com.mojang.brigadier.exceptions.Dynamic2CommandExceptionType;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import org.eu.pnxlr.git.litelogin.api.internal.util.Pair;
-import org.eu.pnxlr.git.litelogin.core.main.Core;
 
 /**
- * 自定义消息
+ * Custom messages.
  */
 public class BuiltInExceptions implements BuiltInExceptionProvider {
-    private final Dynamic2CommandExceptionType DOUBLE_TOO_SMALL;
-    private final Dynamic2CommandExceptionType DOUBLE_TOO_BIG;
-    private final Dynamic2CommandExceptionType FLOAT_TOO_SMALL;
-    private final Dynamic2CommandExceptionType FLOAT_TOO_BIG;
-    private final Dynamic2CommandExceptionType INTEGER_TOO_SMALL;
-    private final Dynamic2CommandExceptionType INTEGER_TOO_BIG;
-    private final Dynamic2CommandExceptionType LONG_TOO_SMALL;
-    private final Dynamic2CommandExceptionType LONG_TOO_BIG;
-    private final DynamicCommandExceptionType LITERAL_INCORRECT;
-    private final SimpleCommandExceptionType READER_EXPECTED_START_OF_QUOTE;
-    private final SimpleCommandExceptionType READER_EXPECTED_END_OF_QUOTE;
-    private final DynamicCommandExceptionType READER_INVALID_ESCAPE;
-    private final DynamicCommandExceptionType READER_INVALID_BOOL;
-    private final DynamicCommandExceptionType READER_INVALID_INT;
-    private final SimpleCommandExceptionType READER_EXPECTED_INT;
-    private final DynamicCommandExceptionType READER_INVALID_LONG;
-    private final SimpleCommandExceptionType READER_EXPECTED_LONG;
-    private final DynamicCommandExceptionType READER_INVALID_DOUBLE;
-    private final SimpleCommandExceptionType READER_EXPECTED_DOUBLE;
-    private final DynamicCommandExceptionType READER_INVALID_FLOAT;
-    private final SimpleCommandExceptionType READER_EXPECTED_FLOAT;
-    private final SimpleCommandExceptionType READER_EXPECTED_BOOL;
-    private final DynamicCommandExceptionType READER_EXPECTED_SYMBOL;
-    private final SimpleCommandExceptionType DISPATCHER_UNKNOWN_COMMAND;
-    private final SimpleCommandExceptionType DISPATCHER_UNKNOWN_ARGUMENT;
-    private final SimpleCommandExceptionType DISPATCHER_EXPECTED_ARGUMENT_SEPARATOR;
-    private final DynamicCommandExceptionType DISPATCHER_PARSE_EXCEPTION;
+    private final Dynamic2CommandExceptionType doubleTooSmall;
+    private final Dynamic2CommandExceptionType doubleTooBig;
+    private final Dynamic2CommandExceptionType floatTooSmall;
+    private final Dynamic2CommandExceptionType floatTooBig;
+    private final Dynamic2CommandExceptionType integerTooSmall;
+    private final Dynamic2CommandExceptionType integerTooBig;
+    private final Dynamic2CommandExceptionType longTooSmall;
+    private final Dynamic2CommandExceptionType longTooBig;
+    private final DynamicCommandExceptionType literalIncorrect;
+    private final SimpleCommandExceptionType readerExpectedStartOfQuote;
+    private final SimpleCommandExceptionType readerExpectedEndOfQuote;
+    private final DynamicCommandExceptionType readerInvalidEscape;
+    private final DynamicCommandExceptionType readerInvalidBool;
+    private final DynamicCommandExceptionType readerInvalidInt;
+    private final SimpleCommandExceptionType readerExpectedInt;
+    private final DynamicCommandExceptionType readerInvalidLong;
+    private final SimpleCommandExceptionType readerExpectedLong;
+    private final DynamicCommandExceptionType readerInvalidDouble;
+    private final SimpleCommandExceptionType readerExpectedDouble;
+    private final DynamicCommandExceptionType readerInvalidFloat;
+    private final SimpleCommandExceptionType readerExpectedFloat;
+    private final SimpleCommandExceptionType readerExpectedBool;
+    private final DynamicCommandExceptionType readerExpectedSymbol;
+    private final SimpleCommandExceptionType dispatcherUnknownCommand;
+    private final SimpleCommandExceptionType dispatcherUnknownArgument;
+    private final SimpleCommandExceptionType dispatcherExpectedArgumentSeparator;
+    private final DynamicCommandExceptionType dispatcherParseException;
 
-    // custom
-    private final SimpleCommandExceptionType REQUIRE_PLAYER;
-    private final DynamicCommandExceptionType PLAYER_NOT_ONLINE;
-
-    private final SimpleCommandExceptionType CACHE_NOT_FOUND_SELF;
-    private final SimpleCommandExceptionType NO_SELF;
-
-    private final Dynamic2CommandExceptionType CACHE_NOT_FOUND_OTHER;
-
-    public BuiltInExceptions(Core core) {
-        DOUBLE_TOO_SMALL = new Dynamic2CommandExceptionType((found, min) -> new LiteralMessage(msg("§cThe number must not be smaller than §e{min}§c. Found §e{found}§c.", new Pair<>("found", found), new Pair<>("min", min))));
-        DOUBLE_TOO_BIG = new Dynamic2CommandExceptionType((found, max) -> new LiteralMessage(msg("§cThe number must not be larger than §e{max}§c. Found §e{found}§c.", new Pair<>("found", found), new Pair<>("max", max))));
-        FLOAT_TOO_SMALL = new Dynamic2CommandExceptionType((found, min) -> new LiteralMessage(msg("§cThe number must not be smaller than §e{min}§c. Found §e{found}§c.", new Pair<>("found", found), new Pair<>("min", min))));
-        FLOAT_TOO_BIG = new Dynamic2CommandExceptionType((found, max) -> new LiteralMessage(msg("§cThe number must not be larger than §e{max}§c. Found §e{found}§c.", new Pair<>("found", found), new Pair<>("max", max))));
-        INTEGER_TOO_SMALL = new Dynamic2CommandExceptionType((found, min) -> new LiteralMessage(msg("§cThe integer must not be smaller than §e{min}§c. Found §e{found}§c.", new Pair<>("found", found), new Pair<>("min", min))));
-        INTEGER_TOO_BIG = new Dynamic2CommandExceptionType((found, max) -> new LiteralMessage(msg("§cThe integer must not be larger than §e{max}§c. Found §e{found}§c.", new Pair<>("found", found), new Pair<>("max", max))));
-        LONG_TOO_SMALL = new Dynamic2CommandExceptionType((found, min) -> new LiteralMessage(msg("§cThe long value must not be smaller than §e{min}§c. Found §e{found}§c.", new Pair<>("found", found), new Pair<>("min", min))));
-        LONG_TOO_BIG = new Dynamic2CommandExceptionType((found, max) -> new LiteralMessage(msg("§cThe long value must not be larger than §e{max}§c. Found §e{found}§c.", new Pair<>("found", found), new Pair<>("max", max))));
-        LITERAL_INCORRECT = new DynamicCommandExceptionType(expected -> new LiteralMessage(msg("§cExpected literal §e{expected}§c.", new Pair<>("expected", expected))));
-        READER_EXPECTED_START_OF_QUOTE = new SimpleCommandExceptionType(new LiteralMessage("§cExpected a quote to start the string."));
-        READER_EXPECTED_END_OF_QUOTE = new SimpleCommandExceptionType(new LiteralMessage("§cUnclosed quoted string."));
-        READER_INVALID_ESCAPE = new DynamicCommandExceptionType(character -> new LiteralMessage(msg("§cInvalid escape sequence §e{character}§c in quoted string.", new Pair<>("character", character))));
-        READER_INVALID_BOOL = new DynamicCommandExceptionType(value -> new LiteralMessage(msg("§cInvalid boolean value §e{value}§c. Expected true or false.", new Pair<>("value", value))));
-        READER_INVALID_INT = new DynamicCommandExceptionType(value -> new LiteralMessage(msg("§cInvalid integer §e{value}§c.", new Pair<>("value", value))));
-        READER_EXPECTED_INT = new SimpleCommandExceptionType(new LiteralMessage("§cExpected an integer."));
-        READER_INVALID_LONG = new DynamicCommandExceptionType(value -> new LiteralMessage(msg("§cInvalid long value §e{value}§c.", new Pair<>("value", value))));
-        READER_EXPECTED_LONG = new SimpleCommandExceptionType(new LiteralMessage("§cExpected a long value."));
-        READER_INVALID_DOUBLE = new DynamicCommandExceptionType(value -> new LiteralMessage(msg("§cInvalid double value §e{value}§c.", new Pair<>("value", value))));
-        READER_EXPECTED_DOUBLE = new SimpleCommandExceptionType(new LiteralMessage("§cExpected a double value."));
-        READER_INVALID_FLOAT = new DynamicCommandExceptionType(value -> new LiteralMessage(msg("§cInvalid float value §e{value}§c.", new Pair<>("value", value))));
-        READER_EXPECTED_FLOAT = new SimpleCommandExceptionType(new LiteralMessage("§cExpected a float value."));
-        READER_EXPECTED_BOOL = new SimpleCommandExceptionType(new LiteralMessage("§cExpected a boolean value."));
-        READER_EXPECTED_SYMBOL = new DynamicCommandExceptionType(symbol -> new LiteralMessage(msg("§cExpected §e{symbol}§c.", new Pair<>("symbol", symbol))));
-        DISPATCHER_UNKNOWN_COMMAND = new SimpleCommandExceptionType(new LiteralMessage("§cUnknown command."));
-        DISPATCHER_UNKNOWN_ARGUMENT = new SimpleCommandExceptionType(new LiteralMessage("§cIncorrect command arguments."));
-        DISPATCHER_EXPECTED_ARGUMENT_SEPARATOR = new SimpleCommandExceptionType(new LiteralMessage("§cExpected whitespace to end one argument, but found trailing data."));
-        DISPATCHER_PARSE_EXCEPTION = new DynamicCommandExceptionType(message -> new LiteralMessage(msg("§cCould not parse command §e{command}§c.", new Pair<>("command", message))));
-
-        REQUIRE_PLAYER = new SimpleCommandExceptionType(new LiteralMessage("§cThis command can only be used by a player."));
-        PLAYER_NOT_ONLINE = new DynamicCommandExceptionType(value -> new LiteralMessage(msg("§cPlayer §e{name}§c is not online.", new Pair<>("name", value))));
-        CACHE_NOT_FOUND_SELF = new SimpleCommandExceptionType(new LiteralMessage("§cYour login data could not be found. Did you join through LiteLogin?"));
-        NO_SELF = new SimpleCommandExceptionType(new LiteralMessage("§cYou cannot target yourself."));
-        CACHE_NOT_FOUND_OTHER = new Dynamic2CommandExceptionType((uuid, name) -> new LiteralMessage(
-                msg("§cCould not find login data for player §8[§e{uuid}§8](§e{name}§8). Did they join through LiteLogin?",
-                        new Pair<>("uuid", uuid),
-                        new Pair<>("name", name)
-                )));
+    public BuiltInExceptions() {
+        doubleTooSmall = new Dynamic2CommandExceptionType((found, min) -> new LiteralMessage(msg("The number must not be smaller than {min}. Found {found}.", new Pair<>("found", found), new Pair<>("min", min))));
+        doubleTooBig = new Dynamic2CommandExceptionType((found, max) -> new LiteralMessage(msg("The number must not be larger than {max}. Found {found}.", new Pair<>("found", found), new Pair<>("max", max))));
+        floatTooSmall = new Dynamic2CommandExceptionType((found, min) -> new LiteralMessage(msg("The number must not be smaller than {min}. Found {found}.", new Pair<>("found", found), new Pair<>("min", min))));
+        floatTooBig = new Dynamic2CommandExceptionType((found, max) -> new LiteralMessage(msg("The number must not be larger than {max}. Found {found}.", new Pair<>("found", found), new Pair<>("max", max))));
+        integerTooSmall = new Dynamic2CommandExceptionType((found, min) -> new LiteralMessage(msg("The integer must not be smaller than {min}. Found {found}.", new Pair<>("found", found), new Pair<>("min", min))));
+        integerTooBig = new Dynamic2CommandExceptionType((found, max) -> new LiteralMessage(msg("The integer must not be larger than {max}. Found {found}.", new Pair<>("found", found), new Pair<>("max", max))));
+        longTooSmall = new Dynamic2CommandExceptionType((found, min) -> new LiteralMessage(msg("The long value must not be smaller than {min}. Found {found}.", new Pair<>("found", found), new Pair<>("min", min))));
+        longTooBig = new Dynamic2CommandExceptionType((found, max) -> new LiteralMessage(msg("The long value must not be larger than {max}. Found {found}.", new Pair<>("found", found), new Pair<>("max", max))));
+        literalIncorrect = new DynamicCommandExceptionType(expected -> new LiteralMessage(msg("Expected literal {expected}.", new Pair<>("expected", expected))));
+        readerExpectedStartOfQuote = new SimpleCommandExceptionType(new LiteralMessage("Expected a quote to start the string."));
+        readerExpectedEndOfQuote = new SimpleCommandExceptionType(new LiteralMessage("Unclosed quoted string."));
+        readerInvalidEscape = new DynamicCommandExceptionType(character -> new LiteralMessage(msg("Invalid escape sequence {character} in quoted string.", new Pair<>("character", character))));
+        readerInvalidBool = new DynamicCommandExceptionType(value -> new LiteralMessage(msg("Invalid boolean value {value}. Expected true or false.", new Pair<>("value", value))));
+        readerInvalidInt = new DynamicCommandExceptionType(value -> new LiteralMessage(msg("Invalid integer {value}.", new Pair<>("value", value))));
+        readerExpectedInt = new SimpleCommandExceptionType(new LiteralMessage("Expected an integer."));
+        readerInvalidLong = new DynamicCommandExceptionType(value -> new LiteralMessage(msg("Invalid long value {value}.", new Pair<>("value", value))));
+        readerExpectedLong = new SimpleCommandExceptionType(new LiteralMessage("Expected a long value."));
+        readerInvalidDouble = new DynamicCommandExceptionType(value -> new LiteralMessage(msg("Invalid double value {value}.", new Pair<>("value", value))));
+        readerExpectedDouble = new SimpleCommandExceptionType(new LiteralMessage("Expected a double value."));
+        readerInvalidFloat = new DynamicCommandExceptionType(value -> new LiteralMessage(msg("Invalid float value {value}.", new Pair<>("value", value))));
+        readerExpectedFloat = new SimpleCommandExceptionType(new LiteralMessage("Expected a float value."));
+        readerExpectedBool = new SimpleCommandExceptionType(new LiteralMessage("Expected a boolean value."));
+        readerExpectedSymbol = new DynamicCommandExceptionType(symbol -> new LiteralMessage(msg("Expected {symbol}.", new Pair<>("symbol", symbol))));
+        dispatcherUnknownCommand = new SimpleCommandExceptionType(new LiteralMessage("Unknown command."));
+        dispatcherUnknownArgument = new SimpleCommandExceptionType(new LiteralMessage("Incorrect command arguments."));
+        dispatcherExpectedArgumentSeparator = new SimpleCommandExceptionType(new LiteralMessage("Expected whitespace to end one argument, but found trailing data."));
+        dispatcherParseException = new DynamicCommandExceptionType(message -> new LiteralMessage(msg("Could not parse command {command}.", new Pair<>("command", message))));
     }
 
     private static String msg(String template, Pair<?, ?>... pairs) {
@@ -95,156 +75,136 @@ public class BuiltInExceptions implements BuiltInExceptionProvider {
 
     @Override
     public Dynamic2CommandExceptionType doubleTooLow() {
-        return DOUBLE_TOO_SMALL;
+        return doubleTooSmall;
     }
 
     @Override
     public Dynamic2CommandExceptionType doubleTooHigh() {
-        return DOUBLE_TOO_BIG;
+        return doubleTooBig;
     }
 
     @Override
     public Dynamic2CommandExceptionType floatTooLow() {
-        return FLOAT_TOO_SMALL;
+        return floatTooSmall;
     }
 
     @Override
     public Dynamic2CommandExceptionType floatTooHigh() {
-        return FLOAT_TOO_BIG;
+        return floatTooBig;
     }
 
     @Override
     public Dynamic2CommandExceptionType integerTooLow() {
-        return INTEGER_TOO_SMALL;
+        return integerTooSmall;
     }
 
     @Override
     public Dynamic2CommandExceptionType integerTooHigh() {
-        return INTEGER_TOO_BIG;
+        return integerTooBig;
     }
 
     @Override
     public Dynamic2CommandExceptionType longTooLow() {
-        return LONG_TOO_SMALL;
+        return longTooSmall;
     }
 
     @Override
     public Dynamic2CommandExceptionType longTooHigh() {
-        return LONG_TOO_BIG;
+        return longTooBig;
     }
 
     @Override
     public DynamicCommandExceptionType literalIncorrect() {
-        return LITERAL_INCORRECT;
+        return literalIncorrect;
     }
 
     @Override
     public SimpleCommandExceptionType readerExpectedStartOfQuote() {
-        return READER_EXPECTED_START_OF_QUOTE;
+        return readerExpectedStartOfQuote;
     }
 
     @Override
     public SimpleCommandExceptionType readerExpectedEndOfQuote() {
-        return READER_EXPECTED_END_OF_QUOTE;
+        return readerExpectedEndOfQuote;
     }
 
     @Override
     public DynamicCommandExceptionType readerInvalidEscape() {
-        return READER_INVALID_ESCAPE;
+        return readerInvalidEscape;
     }
 
     @Override
     public DynamicCommandExceptionType readerInvalidBool() {
-        return READER_INVALID_BOOL;
+        return readerInvalidBool;
     }
 
     @Override
     public DynamicCommandExceptionType readerInvalidInt() {
-        return READER_INVALID_INT;
+        return readerInvalidInt;
     }
 
     @Override
     public SimpleCommandExceptionType readerExpectedInt() {
-        return READER_EXPECTED_INT;
+        return readerExpectedInt;
     }
 
     @Override
     public DynamicCommandExceptionType readerInvalidLong() {
-        return READER_INVALID_LONG;
+        return readerInvalidLong;
     }
 
     @Override
     public SimpleCommandExceptionType readerExpectedLong() {
-        return READER_EXPECTED_LONG;
+        return readerExpectedLong;
     }
 
     @Override
     public DynamicCommandExceptionType readerInvalidDouble() {
-        return READER_INVALID_DOUBLE;
+        return readerInvalidDouble;
     }
 
     @Override
     public SimpleCommandExceptionType readerExpectedDouble() {
-        return READER_EXPECTED_DOUBLE;
+        return readerExpectedDouble;
     }
 
     @Override
     public DynamicCommandExceptionType readerInvalidFloat() {
-        return READER_INVALID_FLOAT;
+        return readerInvalidFloat;
     }
 
     @Override
     public SimpleCommandExceptionType readerExpectedFloat() {
-        return READER_EXPECTED_FLOAT;
+        return readerExpectedFloat;
     }
 
     @Override
     public SimpleCommandExceptionType readerExpectedBool() {
-        return READER_EXPECTED_BOOL;
+        return readerExpectedBool;
     }
 
     @Override
     public DynamicCommandExceptionType readerExpectedSymbol() {
-        return READER_EXPECTED_SYMBOL;
+        return readerExpectedSymbol;
     }
 
     @Override
     public SimpleCommandExceptionType dispatcherUnknownCommand() {
-        return DISPATCHER_UNKNOWN_COMMAND;
+        return dispatcherUnknownCommand;
     }
 
     @Override
     public SimpleCommandExceptionType dispatcherUnknownArgument() {
-        return DISPATCHER_UNKNOWN_ARGUMENT;
+        return dispatcherUnknownArgument;
     }
 
     @Override
     public SimpleCommandExceptionType dispatcherExpectedArgumentSeparator() {
-        return DISPATCHER_EXPECTED_ARGUMENT_SEPARATOR;
+        return dispatcherExpectedArgumentSeparator;
     }
 
     @Override
     public DynamicCommandExceptionType dispatcherParseException() {
-        return DISPATCHER_PARSE_EXCEPTION;
-    }
-
-    public SimpleCommandExceptionType requirePlayer() {
-        return REQUIRE_PLAYER;
-    }
-
-    public DynamicCommandExceptionType playerNotOnline() {
-        return PLAYER_NOT_ONLINE;
-    }
-
-    public SimpleCommandExceptionType noSelf() {
-        return NO_SELF;
-    }
-
-    public SimpleCommandExceptionType cacheNotFoundSelf() {
-        return CACHE_NOT_FOUND_SELF;
-    }
-
-    public Dynamic2CommandExceptionType cacheNotFoundOther() {
-        return CACHE_NOT_FOUND_OTHER;
+        return dispatcherParseException;
     }
 }

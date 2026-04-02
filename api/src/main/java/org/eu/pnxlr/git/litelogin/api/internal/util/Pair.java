@@ -5,7 +5,7 @@ import lombok.Data;
 import org.jetbrains.annotations.ApiStatus;
 
 /**
- * 表示一对对象
+ * Represents a pair of values.
  */
 @Data
 @ApiStatus.Internal

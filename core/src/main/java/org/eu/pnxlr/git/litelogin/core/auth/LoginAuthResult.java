@@ -3,7 +3,6 @@ package org.eu.pnxlr.git.litelogin.core.auth;
 import lombok.Getter;
 import org.eu.pnxlr.git.litelogin.api.internal.auth.AuthResult;
 import org.eu.pnxlr.git.litelogin.api.profile.GameProfile;
-import org.eu.pnxlr.git.litelogin.core.auth.service.BaseServiceAuthenticationResult;
 import org.eu.pnxlr.git.litelogin.core.auth.service.yggdrasil.UnmodifiableGameProfile;
 import org.eu.pnxlr.git.litelogin.core.auth.service.yggdrasil.YggdrasilAuthenticationResult;
 import org.eu.pnxlr.git.litelogin.core.auth.validate.ValidateAuthenticationResult;

@@ -10,7 +10,7 @@ import org.eu.pnxlr.git.litelogin.api.internal.logger.LoggerProvider;
 import org.eu.pnxlr.git.litelogin.api.internal.plugin.IPlayer;
 import org.eu.pnxlr.git.litelogin.api.internal.util.Pair;
 import org.eu.pnxlr.git.litelogin.api.service.IService;
-import org.eu.pnxlr.git.litelogin.core.configuration.service.BaseServiceConfig;
+import org.eu.pnxlr.git.litelogin.core.configuration.BaseServiceConfig;
 import org.eu.pnxlr.git.litelogin.core.main.Core;
 import org.jetbrains.annotations.NotNull;
 
@@ -22,7 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
- * 数据缓存中心
+ * Data cache center.
  */
 public class PlayerHandler implements HandlerAPI {
 
@@ -32,7 +32,7 @@ public class PlayerHandler implements HandlerAPI {
     private final Map<UUID, Entry> cache;
 
     // inGameUUID \ Entry
-    // 表示登录缓存
+    // Login cache
     @Getter
     private final Map<UUID, Entry> loginCache;
 
@@ -51,13 +51,7 @@ public class PlayerHandler implements HandlerAPI {
     public HandleResult pushPlayerJoinGame(UUID inGameUUID, String username) {
         Entry remove = loginCache.remove(inGameUUID);
         if (remove == null) {
-            if (core.getPluginConfig().isForceUseLogin()) {
-                return new HandleResult(HandleResult.Type.KICK, "§cYou must authenticate through §eLiteLogin§c to join this server.");
-            }
-            LoggerProvider.getLogger().warn(String.format(
-                    "The player with in-game UUID %s and name %s did not join through LiteLogin. Some features will be disabled for this session.",
-                    inGameUUID.toString(), username
-            ));
+            return new HandleResult(HandleResult.Type.KICK, "You must authenticate through LiteLogin to join this server.");
         } else {
             long l = System.currentTimeMillis() - remove.signTimeMillis;
             if (l > 5 * 1000) {
@@ -74,29 +68,6 @@ public class PlayerHandler implements HandlerAPI {
 
     @Override
     public void callPlayerJoinGame(IPlayer player) {
-        if (!core.getPluginConfig().isWelcomeMsg()) {
-            return;
-        }
-
-        core.getPlugin().getRunServer().getScheduler().runTaskAsync(() -> {
-            Pair<GameProfile, BaseServiceConfig> pair = getPlayerOnlineProfile0(player.getUniqueId());
-            String msg;
-            if (pair == null) {
-                msg = org.eu.pnxlr.git.litelogin.api.internal.util.ValueUtil.transPapi("§aWelcome, §e{profile_name}§",
-                        new Pair<>("profile_name", player.getName()),
-                        new Pair<>("profile_uuid", player.getUniqueId()));
-            } else {
-                msg = org.eu.pnxlr.git.litelogin.api.internal.util.ValueUtil.transPapi("§aWelcome, §e{online_name}§a. You joined through §e{service_name}§a and are currently using the in-game profile §e{profile_name}§a. Use §e/litelogin info§a to inspect your login details.",
-                        new Pair<>("online_name", pair.getValue1().getName()),
-                        new Pair<>("online_uuid", pair.getValue1().getId()),
-                        new Pair<>("service_name", pair.getValue2().getName()),
-                        new Pair<>("service_id", pair.getValue2().getId()),
-                        new Pair<>("profile_name", player.getName()),
-                        new Pair<>("profile_uuid", player.getUniqueId())
-                );
-            }
-            player.sendMessagePL(msg);
-        }, 3000);
     }
 
     public LiteLoginPlayerData getPlayerData(UUID inGameUUID){
@@ -135,11 +106,11 @@ public class PlayerHandler implements HandlerAPI {
 
     public void register() {
         core.getPlugin().getRunServer().getScheduler().runTaskAsyncTimer(() -> {
-            // 存放在线的所有玩家
+            // Store all online players
             Set<UUID> onlinePlayerUUIDs = core.getPlugin().getRunServer().getPlayerManager().getOnlinePlayers().stream()
                     .map(IPlayer::getUniqueId).collect(Collectors.toSet());
 
-            // 遍历当前缓存，获取失效的数据列表
+            // Traverse the current cache and collect invalid entries
             Set<Map.Entry<UUID, Entry>> noExists = cache.entrySet().stream().filter(e -> !onlinePlayerUUIDs.contains(e.getKey())).collect(Collectors.toSet());
 
             try {
@@ -148,17 +119,17 @@ public class PlayerHandler implements HandlerAPI {
                 LoggerProvider.getLogger().error("An exception occurred on the delayed cache clearing.", e);
             }
 
-            // 移除失效的数据
+            // Remove invalid data
             for (Map.Entry<UUID, Entry> e : noExists) {
                 Entry entry = cache.get(e.getKey());
 
-                // 数据已被移除
+                // Data has already been removed
                 if (entry == null) continue;
 
-                // 在移除前数据被更改
+                // Data changed before removal
                 if (!e.getValue().equals(entry)) continue;
 
-                // 进行移除
+                // Remove the entry
                 cache.remove(e.getKey());
             }
 

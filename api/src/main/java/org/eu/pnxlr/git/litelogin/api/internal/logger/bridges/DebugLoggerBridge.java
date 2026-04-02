@@ -6,7 +6,7 @@ import org.eu.pnxlr.git.litelogin.api.internal.logger.LoggerProvider;
 import org.jetbrains.annotations.ApiStatus;
 
 /**
- * 调试日志处理
+ * Debug logger wrapper.
  */
 @ApiStatus.Internal
 public class DebugLoggerBridge implements Logger {

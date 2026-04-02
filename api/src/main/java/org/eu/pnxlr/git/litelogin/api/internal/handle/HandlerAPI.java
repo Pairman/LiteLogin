@@ -8,46 +8,46 @@ import org.jetbrains.annotations.ApiStatus;
 import java.util.UUID;
 
 /**
- * 简单通讯 API，所操作玩家需要在线。
+ * Simple communication API. The target player must be online.
  */
 @ApiStatus.Internal
 public interface HandlerAPI {
 
     /**
-     * 提交一个玩家退出事件
+     * Submits a player quit event.
      *
-     * @param inGameUUID 玩家的游戏内 UUID
+     * @param inGameUUID the player's in-game UUID
      */
     HandleResult pushPlayerQuitGame(UUID inGameUUID, String username);
 
     /**
-     * 提交一个玩家加入事件
+     * Submits a player join event.
      *
-     * @param inGameUUID 玩家的游戏内 UUID
+     * @param inGameUUID the player's in-game UUID
      */
     HandleResult pushPlayerJoinGame(UUID inGameUUID, String username);
 
     void callPlayerJoinGame(IPlayer player);
 
     /**
-     * 获得玩家的在线游戏档案
+     * Returns the player's online game profile.
      *
-     * @param inGameUUID 玩家的游戏内 UUID
-     * @return 一个表示玩家在线数据和验证它的 Yggdrasil ID 的复合类
+     * @param inGameUUID the player's in-game UUID
+     * @return a pair containing the player's online data and the Yggdrasil service ID used for authentication
      */
     Pair<GameProfile, Integer> getPlayerOnlineProfile(UUID inGameUUID);
 
     /**
-     * 获得玩家游戏内 UUID
+     * Returns the player's in-game UUID.
      *
-     * @param onlineUUID 玩家的在线 UUID
-     * @param serviceId  service id
-     * @return 玩家游戏内 UUID
+     * @param onlineUUID the player's online UUID
+     * @param serviceId  service ID
+     * @return the player's in-game UUID
      */
     UUID getInGameUUID(UUID onlineUUID, int serviceId);
 
     /**
-     * 获得 service name
+     * Returns the service name.
      *
      * @param serviceId service id
      * @return Yggdrasil name

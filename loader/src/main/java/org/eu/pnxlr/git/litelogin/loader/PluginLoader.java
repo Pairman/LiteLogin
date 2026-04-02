@@ -1,15 +1,12 @@
-package org.eu.pnxlr.git.litelogin.loader.main;
+package org.eu.pnxlr.git.litelogin.loader;
 
 import lombok.Getter;
 import org.eu.pnxlr.git.litelogin.api.internal.logger.LoggerProvider;
 import org.eu.pnxlr.git.litelogin.api.internal.main.CoreAPI;
 import org.eu.pnxlr.git.litelogin.api.internal.plugin.IPlugin;
+import org.eu.pnxlr.git.litelogin.api.internal.main.LiteLoginConstants;
 import org.eu.pnxlr.git.litelogin.api.internal.util.IOUtil;
-import org.eu.pnxlr.git.litelogin.loader.classloader.IExtURLClassLoader;
 import org.eu.pnxlr.git.litelogin.loader.classloader.PriorAllURLClassLoader;
-import org.eu.pnxlr.git.litelogin.loader.exception.InitialFailedException;
-import org.eu.pnxlr.git.litelogin.loader.library.Library;
-import org.eu.pnxlr.git.litelogin.loader.task.LibraryDownloadTask;
 
 import java.io.*;
 import java.lang.reflect.Constructor;
@@ -24,23 +21,21 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * 表示插件加载器
+ * Represents the plugin loader.
  */
 public class PluginLoader {
-    public static final String nestJarName = "LiteLogin-Core.JarFile";
-    public static final String coreClassName = "org.eu.pnxlr.git.litelogin.core.main.Core";
-    private static final AtomicInteger downloadThreadId = new AtomicInteger();
+    private static final AtomicInteger DOWNLOAD_THREAD_ID = new AtomicInteger();
     private static final ExecutorService DOWNLOAD_EXECUTOR = Executors.newCachedThreadPool(r -> {
-        Thread thread = new Thread(r, "LiteLogin Loader #" + downloadThreadId.incrementAndGet());
+        Thread thread = new Thread(r, "LiteLogin Loader #" + DOWNLOAD_THREAD_ID.incrementAndGet());
         thread.setDaemon(true);
         return thread;
     });
 
-    public static final Map<Library, String> libraryDigestMap;
-    public static final Set<Library> libraries;
-    public static final List<String> repositories;
+    private static final Map<Library, String> LIBRARY_DIGEST_MAP;
+    private static final Set<Library> LIBRARIES;
+    static final List<String> REPOSITORIES;
 
-    // 这里读取依赖数据
+    // Read dependency metadata here
     static {
         try (InputStream resourceAsStream = PluginLoader.class.getClassLoader().getResourceAsStream(".digests");
              InputStreamReader isr = new InputStreamReader(resourceAsStream);
@@ -49,19 +44,19 @@ public class PluginLoader {
             Map<Library, String> tMap = new HashMap<>();
             lnr.lines().filter(s -> !s.trim().isEmpty() && s.charAt(0) != '#').map(s -> s.split("="))
                     .forEach(ss -> tMap.put(Library.of(ss[0], ":"), ss[1]));
-            libraryDigestMap = Collections.unmodifiableMap(tMap);
+            LIBRARY_DIGEST_MAP = Collections.unmodifiableMap(tMap);
         } catch (Exception e) {
-            throw new InitialFailedException(e);
+            throw new RuntimeException(e);
         }
 
         try (InputStream resourceAsStream = PluginLoader.class.getClassLoader().getResourceAsStream("libraries");
              InputStreamReader isr = new InputStreamReader(resourceAsStream);
              LineNumberReader lnr = new LineNumberReader(isr)
         ) {
-            libraries = lnr.lines().filter(s -> !s.trim().isEmpty() && s.charAt(0) != '#')
+            LIBRARIES = lnr.lines().filter(s -> !s.trim().isEmpty() && s.charAt(0) != '#')
                     .map(ss -> Library.of(ss, "\\s+")).collect(Collectors.toUnmodifiableSet());
         } catch (Exception e) {
-            throw new InitialFailedException(e);
+            throw new RuntimeException(e);
         }
 
         try (InputStream resourceAsStream = PluginLoader.class.getClassLoader().getResourceAsStream("repositories");
@@ -73,15 +68,15 @@ public class PluginLoader {
                     .map(s -> s.endsWith("/") ? s : s + '/')
                     .forEach(tList::add);
 
-            repositories = Collections.unmodifiableList(tList);
+            REPOSITORIES = Collections.unmodifiableList(tList);
         } catch (Exception e) {
-            throw new InitialFailedException(e);
+            throw new RuntimeException(e);
         }
 
-        // 判断文件完整
-        for (Library library : libraries) {
-            if (!libraryDigestMap.containsKey(library)) {
-                throw new InitialFailedException("Missing digest for file " + library.getFileName() + ".");
+        // Verify file completeness
+        for (Library library : LIBRARIES) {
+            if (!LIBRARY_DIGEST_MAP.containsKey(library)) {
+                throw new RuntimeException("Missing digest for file " + library.getFileName() + ".");
             }
         }
     }
@@ -90,7 +85,7 @@ public class PluginLoader {
     private final IPlugin plugin;
     private final AtomicBoolean loaded = new AtomicBoolean(false);
     @Getter
-    private IExtURLClassLoader pluginClassLoader = new PriorAllURLClassLoader(new URL[0], PluginLoader.class.getClassLoader(),
+    private PriorAllURLClassLoader pluginClassLoader = new PriorAllURLClassLoader(new URL[0], PluginLoader.class.getClassLoader(),
             Stream.of("org.eu.pnxlr.git.litelogin.", "java.", "net.minecraft.", "com.mojang.").collect(Collectors.toSet()));
     @Getter
     private CoreAPI coreObject;
@@ -101,7 +96,7 @@ public class PluginLoader {
     }
 
     /**
-     * 开始加载
+     * Starts loading.
      */
     public synchronized void load(String... additions) throws Exception {
         if (loaded.getAndSet(true)) {
@@ -112,14 +107,14 @@ public class PluginLoader {
 
         List<Library> needDownload = new ArrayList<>();
 
-        for (Library library : libraries) {
+        for (Library library : LIBRARIES) {
             File file = new File(librariesFolder, library.getFileName());
             if (file.exists() && file.length() != 0) {
                 final String sha256 = getSha256(file);
                 LoggerProvider.getLogger().debug(
                         String.format("The digest value of calculation file %s is %s.", file.getName(), sha256)
                 );
-                if (sha256.equals(libraryDigestMap.get(library))) {
+                if (sha256.equals(LIBRARY_DIGEST_MAP.get(library))) {
                     pluginClassLoader.addURL(file.toURI().toURL());
                     continue;
                 }
@@ -130,7 +125,7 @@ public class PluginLoader {
             needDownload.add(library);
         }
 
-        // 下载缺失文件
+        // Download missing files
         if (needDownload.size() != 0) {
             LoggerProvider.getLogger().info(
                     String.format("Downloading %d missing files...", needDownload.size())
@@ -143,13 +138,13 @@ public class PluginLoader {
             for (Future<Boolean> future : futures) {
                 try {
                     if (!future.get()) {
-                        throw new InitialFailedException("Failed to download the missing file.");
+                        throw new RuntimeException("Failed to download the missing file.");
                     }
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
-                    throw new InitialFailedException(e);
+                    throw new RuntimeException(e);
                 } catch (ExecutionException e) {
-                    throw new InitialFailedException(e.getCause());
+                    throw new RuntimeException(e.getCause());
                 }
             }
         }
@@ -161,18 +156,18 @@ public class PluginLoader {
             LoggerProvider.getLogger().debug(
                     String.format("The digest value of calculation file %s is %s.", file.getName(), sha256)
             );
-            if (sha256.equals(libraryDigestMap.get(library))) {
+            if (sha256.equals(LIBRARY_DIGEST_MAP.get(library))) {
                 pluginClassLoader.addURL(file.toURI().toURL());
                 continue;
             }
-            throw new InitialFailedException(
+            throw new RuntimeException(
                     String.format("Failed to validate the digest value of the file %s that was just downloaded.", file.getAbsolutePath())
             );
         }
 
 
-        // 提取 nest jar
-        loadNestJar(nestJarName, pluginClassLoader);
+        // Extract nested JAR
+        loadNestJar(LiteLoginConstants.CORE_NESTED_JAR_RESOURCE, pluginClassLoader);
 
 
         for (String addition : additions) {
@@ -182,7 +177,7 @@ public class PluginLoader {
         loadCore();
     }
 
-    private void loadNestJar(String nestJarName, IExtURLClassLoader classLoader) throws IOException {
+    private void loadNestJar(String nestJarName, PriorAllURLClassLoader classLoader) throws IOException {
         final File output = File.createTempFile(nestJarName + ".", ".jar", plugin.getTempFolder());
         if (!output.exists()) {
             Files.createFile(output.toPath());
@@ -197,7 +192,7 @@ public class PluginLoader {
     }
 
     private void loadCore() throws Exception {
-        Class<?> coreClass = findClass(coreClassName);
+        Class<?> coreClass = findClass(LiteLoginConstants.CORE_CLASS_NAME);
         for (Constructor<?> constructor : coreClass.getDeclaredConstructors()) {
             Class<?>[] parameterTypes = constructor.getParameterTypes();
             if (parameterTypes.length == 1 && parameterTypes[0] == IPlugin.class) {
@@ -210,14 +205,14 @@ public class PluginLoader {
 
 
     public Class<?> findClass(String name) throws ClassNotFoundException {
-        return Class.forName(name, true, pluginClassLoader.self());
+        return Class.forName(name, true, pluginClassLoader);
     }
 
     /**
-     * 关闭
+     * Closes the loader.
      */
     public synchronized void close() throws Exception {
-        if (pluginClassLoader != null) pluginClassLoader.self().close();
+        if (pluginClassLoader != null) pluginClassLoader.close();
         plugin.getRunServer().getScheduler().shutdown();
         coreObject = null;
         pluginClassLoader = null;
@@ -225,7 +220,7 @@ public class PluginLoader {
     }
 
     /**
-     * 生成依赖和临时目录文件夹
+     * Creates the dependency and temporary directories.
      */
     private void generateFolder() throws IOException {
         if (!librariesFolder.exists() && !librariesFolder.mkdirs()) {
@@ -236,7 +231,7 @@ public class PluginLoader {
         }
     }
 
-    // 获得文件sha256
+    // Returns the file SHA-256
     private String getSha256(File file) throws Exception {
         try (FileInputStream fis = new FileInputStream(file);
              ByteArrayOutputStream baos = new ByteArrayOutputStream();) {

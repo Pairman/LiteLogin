@@ -8,7 +8,7 @@ import org.eu.pnxlr.git.litelogin.api.internal.handle.HandleResult;
 import net.kyori.adventure.text.Component;
 
 /**
- * Velocity 的事件处理程序
+ * Velocity event listener.
  */
 public class GlobalListener {
     private final LiteLoginVelocity plugin;

@@ -13,9 +13,9 @@ import java.text.MessageFormat;
 import java.util.*;
 
 public class InGameProfileTableV3 {
-    private static final String fieldInGameUuid = "in_game_uuid";
-    private static final String fieldCurrentUsernameLowerCase = "current_username_lower_case";
-    private static final String fieldCurrentUsernameOriginal = "current_username_original";
+    private static final String FIELD_IN_GAME_UUID = "in_game_uuid";
+    private static final String FIELD_CURRENT_USERNAME_LOWER_CASE = "current_username_lower_case";
+    private static final String FIELD_CURRENT_USERNAME_ORIGINAL = "current_username_original";
     private final String tableName;
     private final String tableNameV2;
     private final SQLManager sqlManager;
@@ -35,17 +35,17 @@ public class InGameProfileTableV3 {
                         "{3} VARCHAR(64) DEFAULT NULL, " +
                         "CONSTRAINT IGPT_V3_PR PRIMARY KEY ( {1} ), " +
                         "CONSTRAINT IGPT_V3_UN UNIQUE ( {2} ))"
-                , tableName, fieldInGameUuid, fieldCurrentUsernameLowerCase, fieldCurrentUsernameOriginal);
+                , tableName, FIELD_IN_GAME_UUID, FIELD_CURRENT_USERNAME_LOWER_CASE, FIELD_CURRENT_USERNAME_ORIGINAL);
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.executeUpdate();
-            // 查新表有没有数据，没有的话就尝试一下数据升级
+            // Check whether the new table contains data. If not, try migrating the data.
             try (
                     PreparedStatement prepareStatement = connection.prepareStatement("SELECT COUNT(0) FROM " + tableName);
                     ResultSet resultSet = prepareStatement.executeQuery();
             ) {
                 resultSet.next();
                 if (resultSet.getInt(1) != 0) {
-                    // 新表里面有数据，不需要升级
+                    // The new table already contains data, so migration is not needed
                     return;
                 }
             }
@@ -55,17 +55,17 @@ public class InGameProfileTableV3 {
             ) {
                 resultSet.next();
                 if (resultSet.getInt(1) == 0) {
-                    // 老表里面没有数据，不需要升级
+                    // The old table contains no data, so migration is not needed
                     return;
                 }
             } catch (Exception ignored) {
-                // 老表不存在，不需要进行升级
+                // The old table does not exist, so migration is not needed
                 return;
             }
         }
 
         LoggerProvider.getLogger().info("Migrating in-game profile data from " + tableNameV2 + " to " + tableName + '.');
-        // 读老表
+        // Read the old table
         List<Pair<byte[], String>> oldData = new ArrayList<>();
         try (PreparedStatement statement = connection.prepareStatement("SELECT in_game_uuid, current_username FROM " + tableNameV2);
              ResultSet resultSet = statement.executeQuery();) {
@@ -76,7 +76,7 @@ public class InGameProfileTableV3 {
         for (Pair<byte[], String> datum : oldData) {
             try (PreparedStatement statement = connection.prepareStatement(
                     String.format(
-                            "INSERT INTO %s (%s, %s) VALUES (?, ?)", tableName, fieldInGameUuid, fieldCurrentUsernameLowerCase
+                            "INSERT INTO %s (%s, %s) VALUES (?, ?)", tableName, FIELD_IN_GAME_UUID, FIELD_CURRENT_USERNAME_LOWER_CASE
                     )
             )) {
                 statement.setBytes(1, datum.getValue1());
@@ -90,7 +90,7 @@ public class InGameProfileTableV3 {
     public Pair<UUID, String> get(UUID inGameUUID) throws SQLException {
         String sql = String.format(
                 "SELECT %s FROM %s WHERE %s = ? LIMIT 1"
-                , fieldCurrentUsernameOriginal, tableName, fieldInGameUuid
+                , FIELD_CURRENT_USERNAME_ORIGINAL, tableName, FIELD_IN_GAME_UUID
         );
         try (Connection connection = sqlManager.getPool().getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)
@@ -107,15 +107,15 @@ public class InGameProfileTableV3 {
     }
 
     /**
-     * 获得游戏内 UUID
+     * Returns the in-game UUID.
      *
-     * @param currentUsername 用户名
-     * @return 游戏内 UUID
+     * @param currentUsername username
+     * @return in-game UUID
      */
     public UUID getInGameUUIDIgnoreCase(String currentUsername) throws SQLException {
         String sql = String.format(
                 "SELECT %s FROM %s WHERE LOWER(%s) = ? LIMIT 1"
-                , fieldInGameUuid, tableName, fieldCurrentUsernameLowerCase
+                , FIELD_IN_GAME_UUID, tableName, FIELD_CURRENT_USERNAME_LOWER_CASE
         );
         try (Connection connection = sqlManager.getPool().getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)
@@ -131,15 +131,15 @@ public class InGameProfileTableV3 {
     }
 
     /**
-     * 查询数据是否存在
+     * Checks whether the data exists.
      *
-     * @param inGameUUID 游戏内 UUID
-     * @return 是否存在数据
+     * @param inGameUUID in-game UUID
+     * @return whether the data exists
      */
     public boolean dataExists(UUID inGameUUID) throws SQLException {
         String sql = String.format(
                 "SELECT 1 FROM %s WHERE %s = ? LIMIT 1"
-                , tableName, fieldInGameUuid
+                , tableName, FIELD_IN_GAME_UUID
         );
         try (Connection connection = sqlManager.getPool().getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)
@@ -152,14 +152,14 @@ public class InGameProfileTableV3 {
     }
 
     /**
-     * 获得游戏内名字
+     * Returns the in-game name.
      *
-     * @param inGameUUID 游戏内 UUID
+     * @param inGameUUID in-game UUID
      */
     public String getUsername(UUID inGameUUID) throws SQLException {
         String sql = String.format(
                 "SELECT %s FROM %s WHERE %s = ? LIMIT 1"
-                , fieldCurrentUsernameOriginal, tableName, fieldInGameUuid
+                , FIELD_CURRENT_USERNAME_ORIGINAL, tableName, FIELD_IN_GAME_UUID
         );
         try (Connection connection = sqlManager.getPool().getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)
@@ -175,16 +175,16 @@ public class InGameProfileTableV3 {
     }
 
     /**
-     * 更新用户名
+     * Updates the username.
      *
-     * @param inGameUUID      游戏内 UUID
-     * @param currentUsername 新的名字
+     * @param inGameUUID      in-game UUID
+     * @param currentUsername new username
      * @throws SQLException
      */
     public void updateUsername(UUID inGameUUID, String currentUsername) throws SQLException {
         String sql = String.format(
                 "UPDATE %s SET %s = ?, %s = ? WHERE %s = ?"
-                , tableName, fieldCurrentUsernameLowerCase, fieldCurrentUsernameOriginal, fieldInGameUuid
+                , tableName, FIELD_CURRENT_USERNAME_LOWER_CASE, FIELD_CURRENT_USERNAME_ORIGINAL, FIELD_IN_GAME_UUID
         );
         try (Connection connection = sqlManager.getPool().getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)
@@ -197,14 +197,14 @@ public class InGameProfileTableV3 {
     }
 
     /**
-     * 插入一条新的数据
+     * Inserts a new record.
      *
-     * @param inGameUUID 游戏内 UUID
+     * @param inGameUUID in-game UUID
      */
     public void insertNewData(UUID inGameUUID, String currentUsername) throws SQLException {
         String sql = String.format(
                 "INSERT INTO %s (%s, %s, %s) VALUES (?, ?, ?)"
-                , tableName, fieldInGameUuid, fieldCurrentUsernameLowerCase, fieldCurrentUsernameOriginal
+                , tableName, FIELD_IN_GAME_UUID, FIELD_CURRENT_USERNAME_LOWER_CASE, FIELD_CURRENT_USERNAME_ORIGINAL
         );
         try (Connection connection = sqlManager.getPool().getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)
@@ -221,7 +221,7 @@ public class InGameProfileTableV3 {
     public boolean remove(UUID uuid) throws SQLException {
         String sql = String.format(
                 "DELETE FROM %s WHERE %s = ?"
-                , tableName, fieldInGameUuid
+                , tableName, FIELD_IN_GAME_UUID
         );
         try (Connection connection = sqlManager.getPool().getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)
@@ -232,14 +232,14 @@ public class InGameProfileTableV3 {
     }
 
     /**
-     * 擦除用户名使用记录
+     * Clears the username usage record.
      *
-     * @param currentUsername 用户名
+     * @param currentUsername username
      */
     public int eraseUsername(String currentUsername) throws SQLException {
         String sql = String.format(
                 "UPDATE %s SET %s = ?, %s = ? WHERE LOWER(%s) = ?"
-                , tableName, fieldCurrentUsernameLowerCase, fieldCurrentUsernameOriginal, fieldCurrentUsernameLowerCase
+                , tableName, FIELD_CURRENT_USERNAME_LOWER_CASE, FIELD_CURRENT_USERNAME_ORIGINAL, FIELD_CURRENT_USERNAME_LOWER_CASE
         );
         try (Connection connection = sqlManager.getPool().getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)
@@ -254,7 +254,7 @@ public class InGameProfileTableV3 {
     public int eraseAllUsername() throws SQLException {
         String sql = String.format(
                 "UPDATE %s SET %s = ?, %s = ?"
-                , tableName, fieldCurrentUsernameLowerCase, fieldCurrentUsernameOriginal
+                , tableName, FIELD_CURRENT_USERNAME_LOWER_CASE, FIELD_CURRENT_USERNAME_ORIGINAL
         );
         try (Connection connection = sqlManager.getPool().getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)

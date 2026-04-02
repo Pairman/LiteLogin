@@ -6,57 +6,57 @@ import org.jetbrains.annotations.ApiStatus;
 public interface IServer {
 
     /**
-     * 获得线程调度器对象
+     * Returns the thread scheduler.
      *
-     * @return 线程调度器对象
+     * @return the thread scheduler
      */
     BaseScheduler getScheduler();
 
     /**
-     * 获得玩家管理器
+     * Returns the player manager.
      *
-     * @return 获得玩家管理器
+     * @return the player manager
      */
     IPlayerManager getPlayerManager();
 
     /**
-     * 是否开启在线验证
+     * Returns whether online-mode authentication is enabled.
      *
-     * @return 在线验证模式
+     * @return online-mode status
      */
     boolean isOnlineMode();
 
     /**
-     * 返回是否已开启最基本的 UUID 穿透功能
+     * Returns whether the basic UUID forwarding feature is enabled.
      */
     boolean isForwarded();
 
     /**
-     * 获得服务器核心名称
+     * Returns the server core name.
      *
-     * @return 服务器核心名称
+     * @return the server core name
      */
     String getName();
 
     /**
-     * 获得服务器版本
+     * Returns the server version.
      *
-     * @return 服务器版本
+     * @return the server version
      */
     String getVersion();
 
     /**
-     * 关闭服务器
+     * Shuts down the server.
      */
     void shutdown();
 
     /**
-     * 获得控制台对象
+     * Returns the console sender.
      */
     ISender getConsoleSender();
 
     /**
-     * 判断一个插件有没有被加载
+     * Returns whether a plugin is loaded.
      */
     boolean pluginHasEnabled(String id);
 }

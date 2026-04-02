@@ -5,7 +5,7 @@ import lombok.Data;
 import org.jetbrains.annotations.ApiStatus;
 
 /**
- * 表示一堆对象
+ * Represents a triple of values.
  */
 @Data
 @ApiStatus.Internal

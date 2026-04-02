@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Http 日志打印拦截器
+ * HTTP logging interceptor.
  */
 public class LoggingInterceptor implements Interceptor {
 

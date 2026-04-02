@@ -4,18 +4,14 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
-import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.suggestion.Suggestions;
 import lombok.Getter;
-import org.eu.pnxlr.git.litelogin.api.profile.GameProfile;
 import org.eu.pnxlr.git.litelogin.api.internal.command.CommandAPI;
 import org.eu.pnxlr.git.litelogin.api.internal.logger.LoggerProvider;
-import org.eu.pnxlr.git.litelogin.api.internal.plugin.IPlayer;
+import org.eu.pnxlr.git.litelogin.api.internal.main.LiteLoginConstants;
 import org.eu.pnxlr.git.litelogin.api.internal.plugin.ISender;
-import org.eu.pnxlr.git.litelogin.api.internal.util.Pair;
-import org.eu.pnxlr.git.litelogin.core.command.commands.RootCommand;
 import org.eu.pnxlr.git.litelogin.core.main.Core;
 
 import java.util.ArrayList;
@@ -24,27 +20,21 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * 中央命令处理程序
+ * Central command handler.
  */
 public class CommandHandler implements CommandAPI {
     @Getter
     private static Core core;
-    @Getter
-    private static BuiltInExceptions builtInExceptions;
     private final CommandDispatcher<ISender> dispatcher;
-    @Getter
-    private final SecondaryConfirmationHandler secondaryConfirmationHandler;
 
     public CommandHandler(Core core) {
         CommandHandler.core = core;
         this.dispatcher = new CommandDispatcher<>();
-        this.secondaryConfirmationHandler = new SecondaryConfirmationHandler();
     }
 
     public void init() {
-        dispatcher.register(new RootCommand(this).register(literal("litelogin")));
-        CommandSyntaxException.BUILT_IN_EXCEPTIONS = CommandHandler.builtInExceptions =
-                new BuiltInExceptions(core);
+        dispatcher.register(new RootCommand(this).register(literal(LiteLoginConstants.ROOT_COMMAND_LITERAL)));
+        CommandSyntaxException.BUILT_IN_EXCEPTIONS = new BuiltInExceptions();
     }
 
     @Override
@@ -61,7 +51,7 @@ public class CommandHandler implements CommandAPI {
                 sender.sendMessagePL(e.getRawMessage().getString());
                 LoggerProvider.getLogger().debug(String.format("An expected exception occurs when the %s command is ", String.join(" ", args)), e);
             } catch (Exception e) {
-                sender.sendMessagePL("§cAn error occurred while processing the command. Please contact the server administrator.");
+                sender.sendMessagePL("An error occurred while processing the command. Please contact the server administrator.");
                 LoggerProvider.getLogger().error(String.format("An exception occurs when the %s command is ", String.join(" ", args)), e);
             }
         });
@@ -94,54 +84,16 @@ public class CommandHandler implements CommandAPI {
     }
 
     /**
-     * 子命令名字
+     * Subcommand name
      */
     public final LiteralArgumentBuilder<ISender> literal(String literal) {
         return LiteralArgumentBuilder.literal(literal);
     }
 
     /**
-     * 构建命令参数
+     * Builds command arguments
      */
     public final <T> RequiredArgumentBuilder<ISender, T> argument(String name, ArgumentType<T> type) {
         return RequiredArgumentBuilder.argument(name, type);
-    }
-
-    /**
-     * 检查玩家执行
-     */
-    public final void requirePlayer(CommandContext<ISender> context) throws CommandSyntaxException {
-        if (!context.getSource().isPlayer()) {
-            throw builtInExceptions.requirePlayer().create();
-        }
-    }
-
-    public final void requirePlayerAndNoSelf(CommandContext<ISender> context, IPlayer player) throws CommandSyntaxException {
-        if (!context.getSource().isPlayer()) {
-            throw builtInExceptions.requirePlayer().create();
-        }
-        if(context.getSource().getAsPlayer().getUniqueId().equals(player.getUniqueId())){
-            throw builtInExceptions.noSelf().create();
-        }
-    }
-
-    /**
-     * 检查是通过LiteLogin登录的玩家
-     */
-    public final Pair<GameProfile, Integer> requireDataCacheArgumentSelf(CommandContext<ISender> context) throws CommandSyntaxException {
-        requirePlayer(context);
-        Pair<GameProfile, Integer> profile = core.getPlayerHandler().getPlayerOnlineProfile(context.getSource().getAsPlayer().getUniqueId());
-        if (profile == null) {
-            throw builtInExceptions.cacheNotFoundSelf().create();
-        }
-        return profile;
-    }
-
-    public final Pair<GameProfile, Integer> requireDataCacheArgumentOther(IPlayer player) throws CommandSyntaxException {
-        Pair<GameProfile, Integer> profile = core.getPlayerHandler().getPlayerOnlineProfile(player.getUniqueId());
-        if (profile == null) {
-            throw builtInExceptions.cacheNotFoundOther().create(player.getUniqueId(), player.getName());
-        }
-        return profile;
     }
 }

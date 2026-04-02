@@ -19,7 +19,6 @@ import org.eu.pnxlr.git.litelogin.api.internal.main.CoreAPI;
 import org.eu.pnxlr.git.litelogin.api.internal.skinrestorer.SkinRestorerResult;
 import org.eu.pnxlr.git.litelogin.api.internal.util.reflect.Accessor;
 import org.eu.pnxlr.git.litelogin.api.internal.util.reflect.EnumAccessor;
-import org.eu.pnxlr.git.litelogin.api.internal.util.reflect.NoSuchEnumException;
 import org.eu.pnxlr.git.litelogin.api.internal.util.reflect.ReflectUtil;
 import org.eu.pnxlr.git.litelogin.core.auth.LoginAuthResult;
 import net.kyori.adventure.text.Component;
@@ -42,8 +41,6 @@ public class InitialLoginSessionHandlerBridge {
     private static Accessor initialLoginSessionHandlerAccessor;
 
     // LoginStateEnum 的枚举
-    private static Enum<?> loginStateEnum$LOGIN_PACKET_EXPECTED;
-    private static Enum<?> loginStateEnum$LOGIN_PACKET_RECEIVED;
     private static Enum<?> loginStateEnum$ENCRYPTION_REQUEST_SENT;
     private static Enum<?> loginStateEnum$ENCRYPTION_RESPONSE_RECEIVED;
 
@@ -55,7 +52,6 @@ public class InitialLoginSessionHandlerBridge {
     private static MethodHandle getServerField;
     private static MethodHandle getInboundField;
     private static MethodHandle getMcConnectionField;
-    private static MethodHandle getCurrentStateField;
     private static MethodHandle authSessionHandler_allArgsConstructor;
     private static boolean authSessionHandlerNeedsServerIdHash;
     // 类体常量
@@ -82,15 +78,13 @@ public class InitialLoginSessionHandlerBridge {
         }
     }
 
-    public static void init() throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, NoSuchFieldException, NoSuchEnumException {
+    public static void init() throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, NoSuchFieldException, ReflectiveOperationException {
         Class<InitialLoginSessionHandler> initialLoginSessionHandlerClass = InitialLoginSessionHandler.class;
         initialLoginSessionHandlerAccessor = new Accessor(initialLoginSessionHandlerClass);
 
         Class<?> loginStateEnum = Class.forName("com.velocitypowered.proxy.connection.client.InitialLoginSessionHandler$LoginState");
         loginStatsEnumAccessor = new EnumAccessor(loginStateEnum);
 
-        loginStateEnum$LOGIN_PACKET_EXPECTED = loginStatsEnumAccessor.findByName("LOGIN_PACKET_EXPECTED");
-        loginStateEnum$LOGIN_PACKET_RECEIVED = loginStatsEnumAccessor.findByName("LOGIN_PACKET_RECEIVED");
         loginStateEnum$ENCRYPTION_REQUEST_SENT = loginStatsEnumAccessor.findByName("ENCRYPTION_REQUEST_SENT");
         loginStateEnum$ENCRYPTION_RESPONSE_RECEIVED = loginStatsEnumAccessor.findByName("ENCRYPTION_RESPONSE_RECEIVED");
 
@@ -104,7 +98,6 @@ public class InitialLoginSessionHandlerBridge {
         Field currentState = ReflectUtil.handleAccessible(
                 initialLoginSessionHandlerClass.getDeclaredField("currentState")
         );
-        getCurrentStateField = lookup.unreflectGetter(currentState);
         setCurrentStateField = lookup.unreflectSetter(currentState);
 
         getLoginField = lookup.unreflectGetter(ReflectUtil.handleAccessible(
@@ -259,7 +252,7 @@ public class InitialLoginSessionHandlerBridge {
                 } catch (Throwable e){
                     LoggerProvider.getLogger().error("An exception occurred while processing validation results.", e);
                     if (isEncrypted()) {
-                        getInbound().disconnect(Component.text("§cAn exception occurred while handling the login request. Please contact the server administrator."));
+                        getInbound().disconnect(Component.text("An exception occurred while handling the login request. Please contact the server administrator."));
                     }
                     mcConnection.close(true);
                 }

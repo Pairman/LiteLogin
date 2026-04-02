@@ -3,18 +3,18 @@ package org.eu.pnxlr.git.litelogin.api.internal.auth;
 import org.jetbrains.annotations.ApiStatus;
 
 /**
- * 验证 API
+ * Authentication API.
  */
 @ApiStatus.Internal
 public interface AuthAPI {
 
     /**
-     * 进行验证
+     * Performs authentication.
      *
-     * @param username 用户名
-     * @param serverId 服务器ID
-     * @param ip       用户IP
-     * @return 验证结果
+     * @param username username
+     * @param serverId server ID
+     * @param ip       player IP
+     * @return authentication result
      */
     AuthResult auth(String username, String serverId, String ip);
 }

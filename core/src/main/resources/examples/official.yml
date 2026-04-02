@@ -1,9 +1,0 @@
-# Minimal OFFICIAL service example.
-# See template_full.yml for all supported options.
-
-# Please edit before use.
-id: -1
-
-name: 'Official'
-# Don't change it unless you really want to.
-serviceType: OFFICIAL

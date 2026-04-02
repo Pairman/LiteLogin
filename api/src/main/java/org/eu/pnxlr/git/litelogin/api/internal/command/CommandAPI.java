@@ -6,26 +6,26 @@ import org.jetbrains.annotations.ApiStatus;
 import java.util.List;
 
 /**
- * 命令处理程序
+ * Command handler.
  */
 @ApiStatus.Internal
 public interface CommandAPI {
 
     /**
-     * 执行一条指令
+     * Executes a command.
      *
-     * @param sender 指令发送者
-     * @param args   指令参数
+     * @param sender command sender
+     * @param args   command arguments
      */
     void execute(ISender sender, String[] args);
 
     void execute(ISender sender, String args);
 
     /**
-     * 执行指令建议补全
+     * Provides command completion suggestions.
      *
-     * @param sender 指令发送者
-     * @param args   指令参数
+     * @param sender command sender
+     * @param args   command arguments
      */
     List<String> tabComplete(ISender sender, String[] args);
 

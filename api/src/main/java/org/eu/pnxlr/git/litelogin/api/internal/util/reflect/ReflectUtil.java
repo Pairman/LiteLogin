@@ -8,13 +8,13 @@ import java.util.LinkedHashMap;
 import java.util.function.Function;
 
 /**
- * 反射工具库
+ * Reflection utilities.
  */
 @ApiStatus.Internal
 public class ReflectUtil {
 
     /**
-     * 操作 Accessible 属性
+     * Updates the Accessible flag.
      */
     public static Method handleAccessible(Method method) {
         method.setAccessible(true);
@@ -22,7 +22,7 @@ public class ReflectUtil {
     }
 
     /**
-     * 操作 Accessible 属性
+     * Updates the Accessible flag.
      */
     public static<T> Constructor<T> handleAccessible(Constructor<T> constructor) {
         constructor.setAccessible(true);
@@ -30,7 +30,7 @@ public class ReflectUtil {
     }
 
     /**
-     * 操作 Accessible 属性
+     * Updates the Accessible flag.
      */
     public static Field handleAccessible(Field field) {
         field.setAccessible(true);
@@ -38,7 +38,7 @@ public class ReflectUtil {
     }
 
     /**
-     * 指定一个目标类检索第一个出现的成员 Field
+     * Finds the first instance field declared in the target class.
      */
     public static Field findNoStaticField(Class<?> target, Type fieldType) throws NoSuchFieldException {
         for (Field field : target.getDeclaredFields()) {
@@ -57,7 +57,7 @@ public class ReflectUtil {
     }
 
     /**
-     * 指定一个目标类检索第一个出现的成员 Method
+     * Finds the first instance method declared in the target class.
      */
     public static Method findNoStaticMethodByParameters(Class<?> target, Type... fieldTypes) throws NoSuchMethodException {
         for (Method method : target.getDeclaredMethods()) {
@@ -70,7 +70,7 @@ public class ReflectUtil {
     }
 
     /**
-     * 指定一个目标类检索第一个出现的静态 Method
+     * Finds the first static method declared in the target class.
      */
     public static Method findStaticMethodByParameters(Class<?> target, Type... fieldTypes) throws NoSuchMethodException {
         for (Method method : target.getDeclaredMethods()) {
@@ -105,12 +105,12 @@ public class ReflectUtil {
     }
 
     /**
-     * 修改一个 Record 对象的一个字段
+     * Replaces one field in a record object.
      *
-     * @param source   record 对象
-     * @param match    对象匹配函数
-     * @param redirect 重定向对象函数
-     * @return 修改后的 Record，源 Record 不变
+     * @param source   record object
+     * @param match    object matching function
+     * @param redirect redirect object function
+     * @return modified record, leaving the source record unchanged
      */
     public static Object redirectRecordObject(Object source, Function<Object, Boolean> match, Function<Object, Object> redirect)
             throws IllegalAccessException, NoSuchMethodException, InvocationTargetException, InstantiationException {

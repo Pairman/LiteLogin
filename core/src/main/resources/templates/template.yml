@@ -1,0 +1,24 @@
+# LiteLogin authentication service template
+
+# Unique service id. Do not change it after the service is in use.
+id: -1
+
+# Display name.
+name: Unnamed
+
+# Exactly one of the following two options must be specified.
+
+# Mojang-compatible session server.
+officialSessionServer: https://sessionserver.mojang.com
+
+# Blessing Skin Yggdrasil API root.
+blessingSkinApiRoot: https://littleskin.cn/api/yggdrasil
+
+# Append the player IP for validation.
+trackIp: false
+
+# Enable per-service whitelist.
+whitelist: false
+
+# Enable skin restoration.
+skinRestorer: false

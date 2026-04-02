@@ -5,7 +5,7 @@ import lombok.Getter;
 import org.jetbrains.annotations.ApiStatus;
 
 /**
- * 美剧变量访问
+ * Enum constant accessor.
  */
 @ApiStatus.Internal
 @AllArgsConstructor
@@ -14,25 +14,25 @@ public class EnumAccessor {
     private final Class<?> enumClass;
 
     /**
-     * 返回所有枚举常量
+     * Returns all enum constants.
      */
     public Enum<?>[] getValues() {
         return (Enum<?>[]) enumClass.getEnumConstants();
     }
 
     /**
-     * 返回指定索引枚举常量
+     * Returns the enum constant at the given index.
      */
     public Enum<?> indexOf(int index) {
         return getValues()[index];
     }
 
-    public Enum<?> findByName(String name) throws NoSuchEnumException {
+    public Enum<?> findByName(String name) throws ReflectiveOperationException {
         for (Enum<?> value : getValues()) {
             if (value.name().equals(name)) {
                 return value;
             }
         }
-        throw new NoSuchEnumException(String.format("%s -> %s", enumClass.getName(), name));
+        throw new ReflectiveOperationException(String.format("%s -> %s", enumClass.getName(), name));
     }
 }

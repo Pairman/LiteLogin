@@ -10,7 +10,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 /**
- * 游戏档案
+ * Game profile.
  */
 @Data
 @AllArgsConstructor

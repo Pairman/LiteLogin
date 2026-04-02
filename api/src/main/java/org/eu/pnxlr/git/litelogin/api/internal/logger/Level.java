@@ -3,7 +3,7 @@ package org.eu.pnxlr.git.litelogin.api.internal.logger;
 import org.jetbrains.annotations.ApiStatus;
 
 /**
- * 日志级别
+ * Log levels.
  */
 @ApiStatus.Internal
 public enum Level {

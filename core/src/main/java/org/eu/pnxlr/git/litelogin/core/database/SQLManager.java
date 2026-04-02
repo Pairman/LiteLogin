@@ -1,9 +1,8 @@
 package org.eu.pnxlr.git.litelogin.core.database;
 
+import org.h2.jdbcx.JdbcConnectionPool;
 import lombok.Getter;
-import org.eu.pnxlr.git.litelogin.core.configuration.SqlConfig;
-import org.eu.pnxlr.git.litelogin.core.database.pool.H2ConnectionPool;
-import org.eu.pnxlr.git.litelogin.core.database.pool.ISQLConnectionPool;
+import org.eu.pnxlr.git.litelogin.api.internal.main.LiteLoginConstants;
 import org.eu.pnxlr.git.litelogin.core.database.table.InGameProfileTableV3;
 import org.eu.pnxlr.git.litelogin.core.database.table.SkinRestoredCacheTableV2;
 import org.eu.pnxlr.git.litelogin.core.database.table.UserDataTableV3;
@@ -13,13 +12,15 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 /**
- * 数据库管理程序
+ * Database manager.
  */
 public class SQLManager {
+    private static final String DEFAULT_H2_JDBC_URL_TEMPLATE = "jdbc:h2:{0};TRACE_LEVEL_FILE=0;TRACE_LEVEL_SYSTEM_OUT=0";
+    private static final String TABLE_PREFIX = "litelogin_";
     @Getter
     private final Core core;
     @Getter
-    private ISQLConnectionPool pool;
+    private JdbcConnectionPool pool;
     @Getter
     private InGameProfileTableV3 inGameProfileTable;
     @Getter
@@ -33,20 +34,16 @@ public class SQLManager {
     }
 
     public void init() throws SQLException, ClassNotFoundException {
-        SqlConfig sqlConfig = core.getPluginConfig().getSqlConfig();
-        pool = new H2ConnectionPool(
-                core.getPlugin().getDataFolder(),
-                sqlConfig.getUsername(),
-                sqlConfig.getPassword(),
-                sqlConfig.getConnectUrl().isEmpty() ? H2ConnectionPool.defaultUrl : sqlConfig.getConnectUrl()
-        );
-        String tablePrefix = sqlConfig.getTablePrefix() + '_';
-
-        final String inGameProfileTableNameV2 = tablePrefix + "in_game_profile_v2";
-        final String inGameProfileTableNameV3 = tablePrefix + "in_game_profile_v3";
-        final String userDataTableNameV2 = tablePrefix + "user_data_v2";
-        final String userDataTableNameV3 = tablePrefix + "user_data_v3";
-        final String skinRestorerCacheTableNameV2 = tablePrefix + "skin_restored_cache_v2";
+        Class.forName("org.h2.Driver");
+        String jdbcUrl = DEFAULT_H2_JDBC_URL_TEMPLATE.replace("{0}",
+                core.getPlugin().getDataFolder().getAbsolutePath() +
+                java.io.File.separator + LiteLoginConstants.DATABASE_NAME);
+        pool = JdbcConnectionPool.create(jdbcUrl, LiteLoginConstants.DATABASE_NAME, LiteLoginConstants.DATABASE_NAME);
+        final String inGameProfileTableNameV2 = TABLE_PREFIX + "in_game_profile_v2";
+        final String inGameProfileTableNameV3 = TABLE_PREFIX + "in_game_profile_v3";
+        final String userDataTableNameV2 = TABLE_PREFIX + "user_data_v2";
+        final String userDataTableNameV3 = TABLE_PREFIX + "user_data_v3";
+        final String skinRestorerCacheTableNameV2 = TABLE_PREFIX + "skin_restored_cache_v2";
         userDataTable = new UserDataTableV3(this, userDataTableNameV3, userDataTableNameV2);
         skinRestoredCacheTable = new SkinRestoredCacheTableV2(this, skinRestorerCacheTableNameV2);
         inGameProfileTable = new InGameProfileTableV3(this, inGameProfileTableNameV3, inGameProfileTableNameV2);
@@ -61,6 +58,6 @@ public class SQLManager {
     }
 
     public void close() {
-        if (pool != null) pool.close();
+        if (pool != null) pool.dispose();
     }
 }

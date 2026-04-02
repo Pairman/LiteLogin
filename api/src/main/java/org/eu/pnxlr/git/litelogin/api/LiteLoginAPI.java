@@ -10,21 +10,21 @@ import java.util.Collection;
 import java.util.UUID;
 
 /**
- * LiteLogin的API, 全部都在这里了
+ * LiteLogin API. Everything is exposed here.
  */
 @ApiStatus.NonExtendable
 public interface LiteLoginAPI {
 
     /**
-     * 返回所有验证服务列表
-     * @return 所有验证服务列表
+     * Returns all authentication services.
+     * @return all authentication services
      */
     @NotNull Collection<? extends IService> getServices();
 
     /**
-     * 通过游戏内 uuid, 返回玩家的登录数据
-     * @param inGameUUID 游戏内uuid
-     * @return 玩家的登录数据
+     * Returns the player's login data by in-game UUID.
+     * @param inGameUUID in-game UUID
+     * @return the player's login data
      */
     @Nullable
     LiteLoginPlayerData getPlayerData(@NotNull UUID inGameUUID);

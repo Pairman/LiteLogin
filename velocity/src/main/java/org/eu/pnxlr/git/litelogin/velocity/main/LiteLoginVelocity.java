@@ -17,17 +17,14 @@ import com.velocitypowered.proxy.network.Connections;
 import org.eu.pnxlr.git.litelogin.velocity.impl.ChatSessionHandler;
 import org.eu.pnxlr.git.litelogin.velocity.impl.NewChatSessionPacketIDEvent;
 import org.eu.pnxlr.git.litelogin.velocity.impl.VelocityServer;
-import org.eu.pnxlr.git.litelogin.velocity.logger.Slf4jLoggerBridge;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelDuplexHandler;
-import io.netty.channel.ChannelHandler;
-import io.netty.channel.ChannelHandlerContext;
 import lombok.Getter;
 import org.eu.pnxlr.git.litelogin.api.internal.injector.Injector;
 import org.eu.pnxlr.git.litelogin.api.internal.logger.LoggerProvider;
 import org.eu.pnxlr.git.litelogin.api.internal.main.CoreAPI;
+import org.eu.pnxlr.git.litelogin.api.internal.main.LiteLoginConstants;
 import org.eu.pnxlr.git.litelogin.api.internal.plugin.IPlugin;
-import org.eu.pnxlr.git.litelogin.loader.main.PluginLoader;
+import org.eu.pnxlr.git.litelogin.loader.PluginLoader;
 import org.slf4j.Logger;
 
 import java.io.File;
@@ -47,7 +44,6 @@ public class LiteLoginVelocity implements IPlugin {
     private final PluginLoader pluginLoader;
     @Getter
     private CoreAPI coreApi;
-    private static final String KEY = "LiteLoginChatSession";
     private Injector injector;
     @Inject
     public LiteLoginVelocity(ProxyServer server, Logger logger, @DataDirectory Path dataDirectory) {
@@ -58,7 +54,7 @@ public class LiteLoginVelocity implements IPlugin {
         LoggerProvider.setLogger(new Slf4jLoggerBridge(logger));
         this.pluginLoader = new PluginLoader(this);
         try {
-            pluginLoader.load("LiteLogin-Velocity-Injector.JarFile");
+            pluginLoader.load(LiteLoginConstants.VELOCITY_INJECTOR_NESTED_JAR_RESOURCE);
         } catch (Exception e) {
             LoggerProvider.getLogger().error("An exception was encountered while initializing LiteLogin.", e);
             server.shutdown();
@@ -70,17 +66,17 @@ public class LiteLoginVelocity implements IPlugin {
         try {
             coreApi = pluginLoader.getCoreObject();
             coreApi.load();
-            injector = (Injector) pluginLoader.findClass("org.eu.pnxlr.git.litelogin.velocity.injector.VelocityInjector").getConstructor().newInstance();
+            injector = (Injector) pluginLoader.findClass(LiteLoginConstants.VELOCITY_INJECTOR_CLASS_NAME).getConstructor().newInstance();
             injector.inject(coreApi);
-            injector.registerChatSession(coreApi.getMapperConfig().getPacketMapping());
+            injector.registerChatSession(coreApi.getPacketMapping());
         } catch (Throwable e) {
             LoggerProvider.getLogger().error("An exception was encountered while loading LiteLogin.", e);
             server.shutdown();
             return;
         }
         new GlobalListener(this).register();
-        new CommandHandler(this).register("litelogin");
-        //自动检测未映射的ChatSession Packet, 可能对性能有影响?
+        new CommandHandler(this).register(LiteLoginConstants.ROOT_COMMAND_LITERAL);
+        // Automatically detect unmapped ChatSession packets. This may affect performance.
         {
             server.getEventManager().register(this, PostLoginEvent.class,
                     (AwaitingEventExecutor<PostLoginEvent>) postLoginEvent -> EventTask.withContinuation(continuation -> {
@@ -100,10 +96,17 @@ public class LiteLoginVelocity implements IPlugin {
             );
             server.getEventManager().register(this, NewChatSessionPacketIDEvent.class,
                     (AwaitingEventExecutor<NewChatSessionPacketIDEvent>) packetEvent -> EventTask.withContinuation(continuation -> {
-                        runServer.getPlayerManager().kickPlayerIfOnline(packetEvent.getPlayer().getUniqueId(), "§cPlease reconnect to the server.");
-                        coreApi.getMapperConfig().getPacketMapping().put(packetEvent.getVersion().getProtocol(),packetEvent.getPacketID());
-                        coreApi.getMapperConfig().save();
-                        injector.registerChatSession(coreApi.getMapperConfig().getPacketMapping());
+                        try {
+                            if (coreApi.persistPacketMapping(packetEvent.getVersion().getProtocol(), packetEvent.getPacketID())) {
+                                LoggerProvider.getLogger().info(String.format(
+                                        "Discovered a ChatSession packet mapping for protocol %d -> 0x%02X. Saved it to mapper.yml; restart the proxy to apply it.",
+                                        packetEvent.getVersion().getProtocol(),
+                                        packetEvent.getPacketID()
+                                ));
+                            }
+                        } finally {
+                            continuation.resume();
+                        }
                     })
             );
         }
@@ -131,7 +134,7 @@ public class LiteLoginVelocity implements IPlugin {
 
     @Override
     public File getTempFolder() {
-        return new File(getDataFolder(), "tmp");
+        return new File(getDataFolder(), ".tmp");
     }
 
     private void injectPlayer(final Player player) {
@@ -139,14 +142,16 @@ public class LiteLoginVelocity implements IPlugin {
         connectedPlayer.getConnection()
                 .getChannel()
                 .pipeline()
-                .addBefore(Connections.HANDLER, KEY, new ChatSessionHandler(player,server.getEventManager()));
+                .addBefore(Connections.HANDLER, LiteLoginConstants.CHAT_SESSION_PIPELINE_KEY, new ChatSessionHandler(player,server.getEventManager()));
     }
 
     private void removePlayer(final Player player) {
         final ConnectedPlayer connectedPlayer = (ConnectedPlayer) player;
         final Channel channel = connectedPlayer.getConnection().getChannel();
         channel.eventLoop().submit(() -> {
-            channel.pipeline().remove(KEY);
+            if (channel.pipeline().context(LiteLoginConstants.CHAT_SESSION_PIPELINE_KEY) != null) {
+                channel.pipeline().remove(LiteLoginConstants.CHAT_SESSION_PIPELINE_KEY);
+            }
         });
     }
 }

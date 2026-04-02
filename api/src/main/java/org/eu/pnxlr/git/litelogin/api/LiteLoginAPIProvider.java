@@ -4,7 +4,7 @@ import lombok.Getter;
 import org.jetbrains.annotations.ApiStatus;
 
 /**
- * 提供API的地方.................................................
+ * Provides access to the API.
  */
 @ApiStatus.NonExtendable
 public class LiteLoginAPIProvider {

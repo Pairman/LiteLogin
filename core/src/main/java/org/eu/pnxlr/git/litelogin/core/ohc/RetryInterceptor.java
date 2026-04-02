@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 /**
- * 延时重试拦截器
+ * Delayed retry interceptor.
  */
 public class RetryInterceptor implements Interceptor {
     private final int retry;
@@ -39,7 +39,7 @@ public class RetryInterceptor implements Interceptor {
             try {
                 TimeUnit.MILLISECONDS.sleep(delay);
             } catch (InterruptedException e) {
-                throw new InterruptedRetryException(e);
+                throw new IOException(e);
             }
             tc++;
             LoggerProvider.getLogger().debug("--> " + tc + " retry.");

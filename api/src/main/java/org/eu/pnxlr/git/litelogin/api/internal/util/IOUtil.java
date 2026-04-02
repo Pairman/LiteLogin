@@ -11,14 +11,14 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 
 /**
- * 流工具
+ * Stream utilities.
  */
 @ApiStatus.Internal
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class IOUtil {
 
     /**
-     * 拷贝流
+     * Copies a stream.
      */
     public static void copy(InputStream is, OutputStream os) throws IOException {
         byte[] buffer = new byte[1024];
@@ -30,7 +30,7 @@ public class IOUtil {
     }
 
     /**
-     * 递归删除文件
+     * Deletes a file recursively.
      */
     public static void removeAllFiles(File file) throws IOException {
         if (!file.exists()) return;

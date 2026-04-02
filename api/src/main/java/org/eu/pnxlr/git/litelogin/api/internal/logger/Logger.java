@@ -3,17 +3,17 @@ package org.eu.pnxlr.git.litelogin.api.internal.logger;
 import org.jetbrains.annotations.ApiStatus;
 
 /**
- * 一个日志记录程序
+ * Logger abstraction.
  */
 @ApiStatus.Internal
 public interface Logger {
 
     /**
-     * 记录一条日志
+     * Logs a message.
      *
-     * @param level     日志级别
-     * @param message   日志信息
-     * @param throwable 栈信息
+     * @param level     log level
+     * @param message   log message
+     * @param throwable stack trace
      */
     void log(Level level, String message, Throwable throwable);
 

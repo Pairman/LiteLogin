@@ -13,28 +13,25 @@ public interface SkinRestorerResult {
     Throwable getThrowable();
 
     enum Reason {
-        // 档案里面没有皮肤
+        // The profile does not contain a skin
         NO_SKIN,
 
-        // 没有开启皮肤修复
+        // Skin restoration is disabled
         NO_RESTORER,
 
-        // 使用缓存的皮肤修复数据
+        // Used cached restored skin data
         USE_CACHE,
 
-        // 皮肤签名有效，无需修复
+        // The skin signature is valid and no repair is needed
         SIGNATURE_VALID,
 
-        // 皮肤是烂的，比如高清皮或透明皮
+        // The skin is invalid, for example HD or transparent skins
         BAD_SKIN,
 
-        // 皮肤修复成功
+        // Skin restoration succeeded
         RESTORER_SUCCEED,
 
-        // 非阻塞式修复
-        RESTORER_ASYNC,
-
-        // 皮肤修复失败
-        RESTORER_FAILED;
+        // Non-blocking restoration
+        RESTORER_ASYNC;
     }
 }

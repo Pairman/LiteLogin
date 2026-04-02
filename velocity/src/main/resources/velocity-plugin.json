@@ -2,6 +2,6 @@
   "id": "litelogin",
   "name": "LiteLogin",
   "version": "@version@",
-  "authors": "@contributors_json@",
+  "authors": @contributors_json@,
   "main": "org.eu.pnxlr.git.litelogin.velocity.main.LiteLoginVelocity"
 }

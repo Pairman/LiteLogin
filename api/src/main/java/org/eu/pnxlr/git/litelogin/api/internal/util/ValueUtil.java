@@ -13,15 +13,15 @@ import java.util.StringJoiner;
 import java.util.UUID;
 
 /**
- * 值操作工具
+ * Value utilities.
  */
 @ApiStatus.Internal
 public class ValueUtil {
     /**
-     * UUID 转 bytes
+     * Converts a UUID to bytes.
      *
-     * @param uuid 需要转换的 uuid
-     * @return 转换后的 bytes
+     * @param uuid UUID to convert
+     * @return converted bytes
      */
     public static byte[] uuidToBytes(UUID uuid) {
         byte[] uuidBytes = new byte[16];
@@ -30,10 +30,10 @@ public class ValueUtil {
     }
 
     /**
-     * bytes 转 UUID
+     * Converts bytes to a UUID.
      *
-     * @param bytes 需要转换的 bytes
-     * @return 转换后的 UUID
+     * @param bytes bytes to convert
+     * @return converted UUID
      */
     public static UUID bytesToUuid(byte[] bytes) {
         if (bytes.length != 16) return null;
@@ -50,10 +50,10 @@ public class ValueUtil {
     }
 
     /**
-     * 通过字符串生成 UUID
+     * Creates a UUID from a string.
      *
-     * @param uuid 字符串
-     * @return 匹配的 uuid， 否则为空
+     * @param uuid string value
+     * @return matching UUID, or null if invalid
      */
     public static UUID getUuidOrNull(String uuid) {
         UUID ret = null;
@@ -65,10 +65,10 @@ public class ValueUtil {
     }
 
     /**
-     * 判断字符串是否为空
+     * Checks whether a string is empty.
      *
-     * @param str 需要判断的字符串
-     * @return 字符串是否为空
+     * @param str string to check
+     * @return whether the string is empty
      */
     public static boolean isEmpty(String str) {
         return str == null || str.length() == 0;
@@ -83,7 +83,7 @@ public class ValueUtil {
     }
 
     /**
-     * 替换变量
+     * Replaces placeholders.
      */
     public static String transPapi(String s, List<Pair<?, ?>> pairs) {
         for (int i = 0; i < pairs.size(); i++) {
@@ -94,7 +94,7 @@ public class ValueUtil {
     }
 
     /**
-     * 字符串加入
+     * Joins strings.
      */
     public static String join(CharSequence delimiter, CharSequence lastDelimiter, Object... elements) {
         if (elements.length == 0) return "";
@@ -111,7 +111,7 @@ public class ValueUtil {
     }
 
     /**
-     * 返回字符串 sha256
+     * Returns the SHA-256 hash of a string.
      */
     public static byte[] sha256(String str) throws NoSuchAlgorithmException {
         return MessageDigest.getInstance("SHA-256").digest(str.getBytes(StandardCharsets.UTF_8));

@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * GameProfile 的 GSON 序列化程序
+ * Gson serializer for GameProfile.
  */
 @NoArgsConstructor
 public class GameProfileSerializer implements JsonSerializer<GameProfile>, JsonDeserializer<GameProfile> {

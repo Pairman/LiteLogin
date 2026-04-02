@@ -3,49 +3,36 @@ package org.eu.pnxlr.git.litelogin.core.configuration.service.yggdrasil;
 import lombok.Getter;
 import org.eu.pnxlr.git.litelogin.api.internal.util.Pair;
 import org.eu.pnxlr.git.litelogin.api.internal.util.ValueUtil;
-import org.eu.pnxlr.git.litelogin.core.configuration.ConfException;
-import org.eu.pnxlr.git.litelogin.core.configuration.ProxyConfig;
 import org.eu.pnxlr.git.litelogin.core.configuration.SkinRestorerConfig;
-import org.eu.pnxlr.git.litelogin.core.configuration.service.BaseServiceConfig;
+import org.eu.pnxlr.git.litelogin.core.configuration.BaseServiceConfig;
 
+import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
 @Getter
 public abstract class BaseYggdrasilServiceConfig extends BaseServiceConfig {
-    private final boolean trackIp;
-    private final int timeout;
-    private final int retry;
-    private final long retryDelay;
-    private final ProxyConfig authProxy;
+    private static final int AUTH_TIMEOUT_MILLIS = 15000;
+    private static final int AUTH_RETRY_COUNT = 3;
+    private static final long AUTH_RETRY_DELAY_MILLIS = 0L;
 
-    protected BaseYggdrasilServiceConfig(int id, String name, InitUUID initUUID, String initNameFormat, boolean whitelist, SkinRestorerConfig skinRestorer,
-                                         boolean trackIp, int timeout, int retry, long retryDelay, ProxyConfig authProxy) throws ConfException {
-        super(id, name, initUUID, initNameFormat, whitelist, skinRestorer);
+    private final boolean trackIp;
+    private final int timeout = AUTH_TIMEOUT_MILLIS;
+    private final int retry = AUTH_RETRY_COUNT;
+    private final long retryDelay = AUTH_RETRY_DELAY_MILLIS;
+
+    protected BaseYggdrasilServiceConfig(int id, String name, boolean whitelist, SkinRestorerConfig skinRestorer,
+                                         boolean trackIp) throws IOException {
+        super(id, name, whitelist, skinRestorer);
         this.trackIp = trackIp;
-        this.timeout = timeout;
-        this.retry = retry;
-        this.retryDelay = retryDelay;
-        this.authProxy = authProxy;
     }
 
 
     /**
-     * 生成验证 URL
+     * Generates the authentication URL.
      */
     public String generateAuthURL(String username, String serverId, String ip) {
         return ValueUtil.transPapi(getAuthURL(),
-                new Pair<>("username", URLEncoder.encode(username, StandardCharsets.UTF_8)),
-                new Pair<>("serverId", URLEncoder.encode(serverId, StandardCharsets.UTF_8)),
-                new Pair<>("ip", generateTraceIpContent(ip)));
-    }
-
-
-    /**
-     * 生成验证 POST 内容
-     */
-    public String generateAuthPostContent(String username, String serverId, String ip) {
-        return ValueUtil.transPapi(getAuthPostContent(),
                 new Pair<>("username", URLEncoder.encode(username, StandardCharsets.UTF_8)),
                 new Pair<>("serverId", URLEncoder.encode(serverId, StandardCharsets.UTF_8)),
                 new Pair<>("ip", generateTraceIpContent(ip)));
@@ -67,26 +54,12 @@ public abstract class BaseYggdrasilServiceConfig extends BaseServiceConfig {
     }
 
     /**
-     * 生成验证 URL
+     * Returns the base authentication URL template.
      */
     protected abstract String getAuthURL();
 
     /**
-     * 生成验证 POST 内容
-     */
-    protected abstract String getAuthPostContent();
-
-    /**
-     * 生成验证 IP 内容
+     * Returns the IP portion of the authentication request.
      */
     protected abstract String getAuthTrackIpContent();
-
-    /**
-     * 返回请求类型
-     */
-    public abstract HttpRequestMethod getHttpRequestMethod();
-
-    public enum HttpRequestMethod {
-        GET, POST
-    }
 }

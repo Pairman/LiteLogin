@@ -2,10 +2,10 @@ package org.eu.pnxlr.git.litelogin.core.auth.validate;
 
 import lombok.Data;
 import org.eu.pnxlr.git.litelogin.api.profile.GameProfile;
-import org.eu.pnxlr.git.litelogin.core.auth.service.BaseServiceAuthenticationResult;
+import org.eu.pnxlr.git.litelogin.core.auth.BaseServiceAuthenticationResult;
 
 /**
- * 游戏内验证消息上下文
+ * In-game validation message context.
  */
 @Data
 public class ValidateContext {

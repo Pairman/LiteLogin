@@ -5,7 +5,7 @@ import org.eu.pnxlr.git.litelogin.api.internal.logger.LoggerProvider;
 import org.eu.pnxlr.git.litelogin.api.internal.util.There;
 import org.eu.pnxlr.git.litelogin.api.internal.util.ValueUtil;
 import org.eu.pnxlr.git.litelogin.core.command.CommandHandler;
-import org.eu.pnxlr.git.litelogin.core.configuration.service.BaseServiceConfig;
+import org.eu.pnxlr.git.litelogin.core.configuration.BaseServiceConfig;
 import org.eu.pnxlr.git.litelogin.core.database.SQLManager;
 
 import java.sql.*;
@@ -13,14 +13,14 @@ import java.text.MessageFormat;
 import java.util.*;
 
 /**
- * 玩家数据表
+ * Player data table.
  */
 public class UserDataTableV3 {
-    private static final String fieldOnlineUUID = "online_uuid";
-    private static final String fieldOnlineName = "online_name";
-    private static final String fieldServiceId = "service_id";
-    private static final String fieldInGameProfileUuid = "in_game_profile_uuid";
-    private static final String fieldWhitelist = "whitelist";
+    private static final String FIELD_ONLINE_UUID = "online_uuid";
+    private static final String FIELD_ONLINE_NAME = "online_name";
+    private static final String FIELD_SERVICE_ID = "service_id";
+    private static final String FIELD_IN_GAME_PROFILE_UUID = "in_game_profile_uuid";
+    private static final String FIELD_WHITELIST = "whitelist";
     private final SQLManager sqlManager;
     private final String tableName;
     private final String tableNameV2;
@@ -40,17 +40,17 @@ public class UserDataTableV3 {
                         "{4} BINARY(16) DEFAULT NULL, " +
                         "{5} BOOL DEFAULT FALSE, " +
                         "PRIMARY KEY ( {1}, {2} ))"
-                , tableName, fieldOnlineUUID, fieldServiceId, fieldOnlineName, fieldInGameProfileUuid, fieldWhitelist);
+                , tableName, FIELD_ONLINE_UUID, FIELD_SERVICE_ID, FIELD_ONLINE_NAME, FIELD_IN_GAME_PROFILE_UUID, FIELD_WHITELIST);
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.executeUpdate();
-            // 查新表有没有数据，没有的话就尝试一下数据升级
+            // Check whether the new table contains data. If not, try migrating the data.
             try (
                     PreparedStatement prepareStatement = connection.prepareStatement("SELECT COUNT(0) FROM " + tableName);
                     ResultSet resultSet = prepareStatement.executeQuery();
             ) {
                 resultSet.next();
                 if (resultSet.getInt(1) != 0) {
-                    // 新表里面有数据，不需要升级
+                    // The new table already contains data, so migration is not needed
                     return;
                 }
             }
@@ -60,11 +60,11 @@ public class UserDataTableV3 {
             ) {
                 resultSet.next();
                 if (resultSet.getInt(1) == 0) {
-                    // 老表里面没有数据，不需要升级
+                    // The old table contains no data, so migration is not needed
                     return;
                 }
             } catch (Exception ignored) {
-                // 老表不存在，不需要进行升级
+                // The old table does not exist, so migration is not needed
                 return;
             }
         }
@@ -78,7 +78,7 @@ public class UserDataTableV3 {
             private final byte[] inGameProfileUUID;
             private final boolean whitelist;
         }
-        // 读老表
+        // Read the old table
         List<V2Entry> oldData = new ArrayList<>();
         try (PreparedStatement statement = connection.prepareStatement("SELECT online_uuid, yggdrasil_id, in_game_profile_uuid, whitelist FROM " + tableNameV2);
              ResultSet resultSet = statement.executeQuery();) {
@@ -93,7 +93,7 @@ public class UserDataTableV3 {
         for (V2Entry datum : oldData) {
             try (PreparedStatement statement = connection.prepareStatement(
                     String.format(
-                            "INSERT INTO %s (%s, %s, %s, %s) VALUES (?, ?, ?, ?)", tableName, fieldOnlineUUID, fieldServiceId, fieldInGameProfileUuid, fieldWhitelist
+                            "INSERT INTO %s (%s, %s, %s, %s) VALUES (?, ?, ?, ?)", tableName, FIELD_ONLINE_UUID, FIELD_SERVICE_ID, FIELD_IN_GAME_PROFILE_UUID, FIELD_WHITELIST
                     )
             )) {
                 statement.setBytes(1, datum.onlineUUID);
@@ -109,7 +109,7 @@ public class UserDataTableV3 {
     public There<String, UUID, Boolean> get(UUID onlineUUID, int serviceId) throws SQLException {
         String sql = String.format(
                 "SELECT %s, %s, %s FROM %s WHERE %s = ? AND %s = ? LIMIT 1"
-                , fieldOnlineName, fieldInGameProfileUuid, fieldWhitelist, tableName, fieldOnlineUUID, fieldServiceId
+                , FIELD_ONLINE_NAME, FIELD_IN_GAME_PROFILE_UUID, FIELD_WHITELIST, tableName, FIELD_ONLINE_UUID, FIELD_SERVICE_ID
         );
         try (Connection connection = sqlManager.getPool().getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)
@@ -131,7 +131,7 @@ public class UserDataTableV3 {
     public UUID getOnlineUUID(String username, int serviceId) throws SQLException {
         String sql = String.format(
                 "SELECT %s FROM %s WHERE lower(%s) = ? AND %s = ? LIMIT 1"
-                , fieldOnlineUUID, tableName, fieldOnlineName, fieldServiceId
+                , FIELD_ONLINE_UUID, tableName, FIELD_ONLINE_NAME, FIELD_SERVICE_ID
         );
         try (Connection connection = sqlManager.getPool().getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)
@@ -148,16 +148,16 @@ public class UserDataTableV3 {
     }
 
     /**
-     * 从数据库中检索用户游戏内 UUID
+     * Retrieves the user's in-game UUID from the database.
      *
-     * @param onlineUUID 用户在线 UUID
-     * @param serviceId  用户在线 UUID 提供的验证服务器 ID
-     * @return 检索到的用户游戏内 UUID
+     * @param onlineUUID user's online UUID
+     * @param serviceId  authentication service ID associated with the online UUID
+     * @return retrieved in-game UUID
      */
     public UUID getInGameUUID(UUID onlineUUID, int serviceId) throws SQLException {
         String sql = String.format(
                 "SELECT %s FROM %s WHERE %s = ? AND %s = ? LIMIT 1"
-                , fieldInGameProfileUuid, tableName, fieldOnlineUUID, fieldServiceId
+                , FIELD_IN_GAME_PROFILE_UUID, tableName, FIELD_ONLINE_UUID, FIELD_SERVICE_ID
         );
         try (Connection connection = sqlManager.getPool().getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)
@@ -174,16 +174,16 @@ public class UserDataTableV3 {
     }
 
     /**
-     * 从数据库中检索用户登录时所用的账户验证服务器 ID
+     * Retrieves the authentication service IDs used by the player at login.
      *
-     * @param inGameUUID 用户游戏内 UUID
-     * @return 检索到的用户在线信息
+     * @param inGameUUID user's in-game UUID
+     * @return retrieved online information
      */
     public Set<Integer> getOnlineServiceIds(UUID inGameUUID) throws SQLException {
         Set<Integer> result = new HashSet<>();
         String sql = String.format(
                 "SELECT %s FROM %s WHERE %s = ?"
-                , fieldServiceId, tableName, fieldInGameProfileUuid
+                , FIELD_SERVICE_ID, tableName, FIELD_IN_GAME_PROFILE_UUID
         );
         try (Connection connection = sqlManager.getPool().getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)
@@ -200,15 +200,15 @@ public class UserDataTableV3 {
 
 
     /**
-     * 返回档案集合
+     * Returns the profile set.
      *
-     * @param inGameUUID 游戏内 UUID
+     * @param inGameUUID in-game UUID
      */
     public Set<There<UUID, String, Integer>> getOnlineProfiles(UUID inGameUUID) throws SQLException {
         Set<There<UUID, String, Integer>> result = new HashSet<>();
         String sql = String.format(
                 "SELECT %s, %s, %s FROM %s WHERE %s = ?"
-                , fieldOnlineUUID, fieldOnlineName, fieldServiceId, tableName, fieldInGameProfileUuid
+                , FIELD_ONLINE_UUID, FIELD_ONLINE_NAME, FIELD_SERVICE_ID, tableName, FIELD_IN_GAME_PROFILE_UUID
         );
         try (Connection connection = sqlManager.getPool().getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)
@@ -228,16 +228,16 @@ public class UserDataTableV3 {
     }
 
     /**
-     * 设置游戏内 UUID
+     * Sets the in-game UUID.
      *
-     * @param onlineUUID    在线 UUID
+     * @param onlineUUID    online UUID
      * @param serviceId     service ID
-     * @param newInGameUUID 新的游戏内 UUID
+     * @param newInGameUUID new in-game UUID
      */
     public int setInGameUUID(UUID onlineUUID, int serviceId, UUID newInGameUUID) throws SQLException {
         String sql = String.format(
                 "UPDATE %s SET %s = ? WHERE %s = ? AND %s = ? LIMIT 1"
-                , tableName, fieldInGameProfileUuid, fieldOnlineUUID, fieldServiceId
+                , tableName, FIELD_IN_GAME_PROFILE_UUID, FIELD_ONLINE_UUID, FIELD_SERVICE_ID
         );
         try (Connection connection = sqlManager.getPool().getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)
@@ -250,15 +250,15 @@ public class UserDataTableV3 {
     }
 
     /**
-     * 查询数据是否存在
+     * Checks whether the data exists.
      *
-     * @param onlineUUID  在线UUID
+     * @param onlineUUID  online UUID
      * @param serviceId service Id
      */
     public boolean dataExists(UUID onlineUUID, int serviceId) throws SQLException {
         String sql = String.format(
                 "SELECT 1 FROM %s WHERE %s = ? AND %s = ? LIMIT 1"
-                , tableName, fieldOnlineUUID, fieldServiceId
+                , tableName, FIELD_ONLINE_UUID, FIELD_SERVICE_ID
         );
         try (Connection connection = sqlManager.getPool().getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)
@@ -272,17 +272,17 @@ public class UserDataTableV3 {
     }
 
     /**
-     * 插入一条用户数据
+     * Inserts a user record.
      *
-     * @param onlineUUID  用户在线 UUID
-     * @param serviceId 用户在线 UUID 提供的验证服务器 ID
-     * @param inGameUUID  新的用户在游戏内的 UUID
-     * @return 数据操作量
+     * @param onlineUUID  user's online UUID
+     * @param serviceId authentication service ID associated with the online UUID
+     * @param inGameUUID  new in-game UUID for the user
+     * @return number of affected rows
      */
     public int insertNewData(UUID onlineUUID, int serviceId, String onlineName, UUID inGameUUID) throws SQLException {
         String sql = String.format(
                 "INSERT INTO %s (%s, %s, %s, %s) VALUES (?, ?, ?, ?) "
-                , tableName, fieldOnlineUUID, fieldServiceId, fieldOnlineName, fieldInGameProfileUuid
+                , tableName, FIELD_ONLINE_UUID, FIELD_SERVICE_ID, FIELD_ONLINE_NAME, FIELD_IN_GAME_PROFILE_UUID
         );
         try (Connection connection = sqlManager.getPool().getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)
@@ -300,16 +300,16 @@ public class UserDataTableV3 {
     }
 
     /**
-     * 设置白名单
+     * Sets whitelist status.
      *
-     * @param onlineUUID  在线 UUID
+     * @param onlineUUID  online UUID
      * @param serviceId service Id
-     * @param whitelist   新的白名单
+     * @param whitelist   new whitelist status
      */
     public void setWhitelist(UUID onlineUUID, int serviceId, boolean whitelist) throws SQLException {
         String sql = String.format(
                 "UPDATE %s SET %s = ? WHERE %s = ? AND %s = ? LIMIT 1"
-                , tableName, fieldWhitelist, fieldOnlineUUID, fieldServiceId
+                , tableName, FIELD_WHITELIST, FIELD_ONLINE_UUID, FIELD_SERVICE_ID
         );
         try (Connection connection = sqlManager.getPool().getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)
@@ -322,12 +322,12 @@ public class UserDataTableV3 {
     }
 
     /**
-     * 查询白名单
+     * Queries whitelist status.
      */
     public boolean hasWhitelist(UUID onlineUUID, int serviceId) throws SQLException {
         String sql = String.format(
                 "SELECT %s FROM %s WHERE %s = ? AND %s = ? LIMIT 1"
-                , fieldWhitelist, tableName, fieldOnlineUUID, fieldServiceId
+                , FIELD_WHITELIST, tableName, FIELD_ONLINE_UUID, FIELD_SERVICE_ID
         );
         try (Connection connection = sqlManager.getPool().getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)
@@ -344,12 +344,12 @@ public class UserDataTableV3 {
     }
 
     /**
-     * 查询白名单
+     * Queries whitelist status.
      */
     public boolean hasWhitelist(UUID inGameUUID) throws SQLException {
         String sql = String.format(
                 "SELECT %s FROM %s WHERE %s = ? LIMIT 1"
-                , fieldWhitelist, tableName, fieldInGameProfileUuid
+                , FIELD_WHITELIST, tableName, FIELD_IN_GAME_PROFILE_UUID
         );
         try (Connection connection = sqlManager.getPool().getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)
@@ -365,12 +365,12 @@ public class UserDataTableV3 {
     }
 
     /**
-     * 设置白名单
+     * Sets whitelist status.
      */
     public void setWhitelist(UUID inGameUUID, boolean whitelist) throws SQLException {
         String sql = String.format(
                 "UPDATE %s SET %s = ? WHERE %s = ?LIMIT 1"
-                , tableName, fieldWhitelist, fieldInGameProfileUuid
+                , tableName, FIELD_WHITELIST, FIELD_IN_GAME_PROFILE_UUID
         );
         try (Connection connection = sqlManager.getPool().getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)
@@ -382,16 +382,16 @@ public class UserDataTableV3 {
     }
 
     /**
-     * 列出白名单
+     * Lists the whitelist.
      */
     public List<String> listWhitelist(boolean verbose) throws SQLException {
         String sql = verbose ? String.format(
             "SELECT %s, %s, %s, %s FROM %s WHERE %s = true",
-            fieldOnlineName, fieldServiceId, fieldOnlineUUID, fieldInGameProfileUuid,
-            tableName, fieldWhitelist
+            FIELD_ONLINE_NAME, FIELD_SERVICE_ID, FIELD_ONLINE_UUID, FIELD_IN_GAME_PROFILE_UUID,
+            tableName, FIELD_WHITELIST
         ) : String.format(
             "SELECT %s FROM %s WHERE %s = true",
-            fieldOnlineName, tableName, fieldWhitelist
+            FIELD_ONLINE_NAME, tableName, FIELD_WHITELIST
         );
         List<String> result = new ArrayList<>();
         try (
@@ -404,13 +404,13 @@ public class UserDataTableV3 {
                     int serviceId = resultSet.getInt(2);
                     BaseServiceConfig serviceConfig = CommandHandler.getCore()
                             .getPluginConfig().getServiceIdMap().get(serviceId);
-                    String serviceName = serviceConfig == null ? "§8Service missing" : serviceConfig.getName();
+                    String serviceName = serviceConfig == null ? "Service missing" : serviceConfig.getName();
                     result.add(String.format(
                         "%s (%s=%d(%s), %s=%s, %s=%s)",
                         resultSet.getString(1),
-                        fieldServiceId, serviceId, serviceName,
-                        fieldOnlineUUID, ValueUtil.bytesToUuid(resultSet.getBytes(3)),
-                        fieldInGameProfileUuid, Optional.ofNullable(resultSet.getBytes(4)).map(ValueUtil::bytesToUuid).orElse(null)
+                        FIELD_SERVICE_ID, serviceId, serviceName,
+                        FIELD_ONLINE_UUID, ValueUtil.bytesToUuid(resultSet.getBytes(3)),
+                        FIELD_IN_GAME_PROFILE_UUID, Optional.ofNullable(resultSet.getBytes(4)).map(ValueUtil::bytesToUuid).orElse(null)
                     ));
                 }
             else
@@ -423,7 +423,7 @@ public class UserDataTableV3 {
     public void setOnlineName(UUID onlineUUID, int serviceId, String onlineName) throws SQLException {
         String sql = String.format(
                 "UPDATE %s SET %s = ? WHERE %s = ? AND %s = ? LIMIT 1"
-                , tableName, fieldOnlineName, fieldOnlineUUID, fieldServiceId
+                , tableName, FIELD_ONLINE_NAME, FIELD_ONLINE_UUID, FIELD_SERVICE_ID
         );
         try (Connection connection = sqlManager.getPool().getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)
@@ -438,7 +438,7 @@ public class UserDataTableV3 {
     public String getOnlineName(UUID onlineUUID, int serviceId) throws SQLException {
         String sql = String.format(
                 "SELECT %s FROM %s WHERE %s = ? AND %s = ? LIMIT 1"
-                , fieldOnlineName, tableName, fieldOnlineUUID, fieldServiceId
+                , FIELD_ONLINE_NAME, tableName, FIELD_ONLINE_UUID, FIELD_SERVICE_ID
         );
         try (Connection connection = sqlManager.getPool().getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)
