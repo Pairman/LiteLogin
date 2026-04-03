@@ -1,6 +1,11 @@
 import org.apache.tools.ant.filters.ReplaceTokens
 import java.text.SimpleDateFormat
 
+plugins {
+    id 'java'
+    id 'com.gradleup.shadow' version '9.1.0'
+}
+
 def pluginAuthors = [
         "CaaMoe",
         "Becods",
@@ -20,124 +25,83 @@ def pluginAuthors = [
         "sdgedghdg"
 ]
 
-ext.mavenRepositories = [
-        "https://maven.aliyun.com/repository/public",
-        "https://repo1.maven.org/maven2",
-        "https://libraries.minecraft.net",
-        "https://repo.papermc.io/repository/maven-public/",
-        "https://maven.elytrium.net/repo/"
-]
-
-ext.libraryDefinitions = [
-        [group: 'com.h2database', name: 'h2', version: '2.1.214'],
+def velocityVersion = '3.5.0-SNAPSHOT'
+def runtimeLibraries = [
+        [group: 'org.hsqldb', name: 'hsqldb', version: '2.7.4'],
         [group: 'com.google.code.gson', name: 'gson', version: '2.10.1'],
-        [group: 'org.spongepowered', name: 'configurate-yaml', version: '4.1.2'],
-        [group: 'org.spongepowered', name: 'configurate-core', version: '4.1.2'],
-        [group: 'org.yaml', name: 'snakeyaml', version: '1.33'],
-        [group: 'io.leangen.geantyref', name: 'geantyref', version: '1.3.14'],
-        [group: 'org.checkerframework', name: 'checker-qual', version: '3.31.0'],
-        [group: 'com.squareup.okhttp3', name: 'okhttp', version: '4.10.0'],
-        [group: 'com.squareup.okio', name: 'okio', version: '3.3.0'],
-        [group: 'com.squareup.okio', name: 'okio-jvm', version: '3.3.0'],
-        [group: 'org.jetbrains.kotlin', name: 'kotlin-stdlib', version: '1.8.10'],
-        [group: 'org.jetbrains.kotlin', name: 'kotlin-stdlib-common', version: '1.8.10'],
+        [group: 'org.yaml', name: 'snakeyaml', version: '2.4'],
         [group: 'com.mojang', name: 'brigadier', version: '1.0.18']
 ]
 
-ext.libraryDigests = [
-        'com.google.code.gson:gson:2.10.1'                    : '4241c14a7727c34feea6507ec801318a3d4a90f070e4525681079fb94ee4c593',
-        'org.yaml:snakeyaml:1.33'                              : '11ff459788f0a2d781f56a4a86d7e69202cebacd0273d5269c4ae9f02f3fd8f0',
-        'com.squareup.okio:okio:3.3.0'                         : '0f2152094ee5730159e18bba69905d024e9c7a9f488f60211a1dd283737fabc5',
-        'com.h2database:h2:2.1.214'                            : 'd623cdc0f61d218cf549a8d09f1c391ff91096116b22e2475475fce4fbe72bd0',
-        'io.leangen.geantyref:geantyref:1.3.14'                : '62b722d132454503904a5f7b0a47a24f0fc581821ec8d3687df1e0f146c6d61e',
-        'com.squareup.okhttp3:okhttp:4.10.0'                  : '7580f14fa1691206e37081ad3f92063b1603b328da0bb316f2fef02e0562e7ec',
-        'com.squareup.okio:okio-jvm:3.3.0'                     : 'dffa8417ec20d7d46bc74c6ad7a4226b38da2588a9754f6298624f04df237222',
-        'com.mojang:brigadier:1.0.18'                          : 'edc4926aa4b49010f6e7ac46efd623fb38f9517344d26f6251d79a26a9738c0b',
-        'org.jetbrains.kotlin:kotlin-stdlib-common:1.8.10'    : '385031de4c6dd9e990d6a44455d79583572a490a3464d7fe7f10a5ecca3225a8',
-        'org.spongepowered:configurate-yaml:4.1.2'            : '01bc57ca7bf5995a6c085f71c6c3bb37809737f0bf423da99b4b8cf2721b732b',
-        'org.checkerframework:checker-qual:3.31.0'            : '1cef5f476d22c6fb45387ddd8404f5e821cbd66487be1bdf8ee64871e63451b9',
-        'org.jetbrains.kotlin:kotlin-stdlib:1.8.10'           : '17e1076131cd07c958a942ff8a087cf865b1ef3de58463e1e5dd6fd7515406b0',
-        'org.spongepowered:configurate-core:4.1.2'            : 'bd6a7bae8b01ccccc24119f6db32f5b1bf7ca33de6586f6d9b8ecd26afe146ac'
-]
+def buildType = System.getProperty('env', 'local').toLowerCase()
 
-allprojects {
-    apply plugin: "java"
-    def getGitCommitId = { ->
-        try {
-            def proc = "git rev-parse --short HEAD".execute()
-            proc.waitFor()
-            if (proc.exitValue() == 0) {
-                return proc.in.text.trim()
-            } else {
-                return "unknown"
-            }
-        } catch (Exception e) {
-            return "unknown"
-        }
-    }
-    ext.gitCommitId = getGitCommitId()
-    version = "${gitCommitId}"
+repositories {
+    mavenCentral()
+    maven { url = "https://libraries.minecraft.net" }
+    maven { url = "https://repo.papermc.io/repository/maven-public/" }
+    maven { url = "https://maven.elytrium.net/repo/" }
 }
 
-subprojects {
-    repositories {
-        for (def repositoryUrl in rootProject.ext.mavenRepositories) {
-            maven {
-                url = repositoryUrl
-            }
-        }
+dependencies {
+    compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.38'
+    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.38'
+
+    implementation("org.jetbrains:annotations:24.1.0")
+    annotationProcessor("org.jetbrains:annotations:24.1.0")
+
+    compileOnly 'io.netty:netty-all:4.1.86.Final'
+    compileOnly 'net.minecrell:terminalconsoleappender:1.3.0'
+    compileOnly "com.velocitypowered:velocity-api:${velocityVersion}"
+    annotationProcessor "com.velocitypowered:velocity-api:${velocityVersion}"
+    compileOnly "com.velocitypowered:velocity-proxy:${velocityVersion}"
+
+    for (def library in runtimeLibraries) {
+        implementation group: library.group, name: library.name, version: library.version
     }
+}
 
-    dependencies {
-        compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.38'
-        annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.38'
+def templateSource = file('src/main/templates')
+def templateDest = layout.buildDirectory.dir('generated/sources/templates')
+def generateTemplates = tasks.register('generateTemplates', Copy) { task ->
+    task.inputs.property('version', project.version.toString())
+    task.from(templateSource)
+    task.into(templateDest)
+    task.expand(version: project.version.toString())
+}
 
-        compileOnly("org.jetbrains:annotations:24.1.0")
-        annotationProcessor("org.jetbrains:annotations:24.1.0")
+sourceSets.main.java.srcDir(generateTemplates.map { it.outputs })
 
-        for (def library in rootProject.ext.libraryDefinitions) {
-            compileOnly group: library.group, name: library.name, version: library.version
-        }
+processResources {
+    setDuplicatesStrategy(DuplicatesStrategy.EXCLUDE)
+
+    filter ReplaceTokens, tokens: [
+            "contributors_json": groovy.json.JsonOutput.toJson(pluginAuthors),
+            "contributors"     : pluginAuthors.join(", "),
+            "version"          : project.version.toString(),
+            "build_type"       : buildType
+    ]
+}
+
+jar {
+    enabled = false
+}
+
+shadowJar {
+    archiveBaseName.set("LiteLogin")
+    archiveVersion.set(project.version.toString())
+    archiveClassifier.set("")
+    dependsOn(generateTemplates)
+    minimize {
+        exclude(dependency("org.hsqldb:hsqldb:.*"))
     }
+}
 
-    processResources {
-        setDuplicatesStrategy(DuplicatesStrategy.EXCLUDE)
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = "UTF-8"
+    options.compilerArgs += ["-Xlint:deprecation", "-Xlint:unchecked"]
+}
 
-        def ver;
-        def env = System.getProperty("env", "AUTO").toLowerCase()
-        if (env == "final") {
-            ver = (project.plugin_version as String)
-        } else {
-            ver = "Build_" + version
-        }
-
-        filter ReplaceTokens, tokens: [
-                "contributors_json": groovy.json.JsonOutput.toJson(pluginAuthors),
-                "contributors"     : pluginAuthors.join(", "),
-                "version"          : ver,
-                "build_type"       : env
-        ]
-    }
-
-    jar {
-        manifest {
-            attributes(
-                    'Built-By'       : System.properties['user.name'],
-                    'Build-Timestamp': new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(new Date()),
-                    'Build-Revision' : gitCommitId,
-                    'Created-By'     : "Gradle ${gradle.gradleVersion}",
-                    'Build-Jdk'      : "${System.properties['java.version']} (${System.properties['java.vendor']} ${System.properties['java.vm.version']})",
-                    'Build-OS'       : "${System.properties['os.name']} ${System.properties['os.arch']} ${System.properties['os.version']}"
-            )
-        }
-    }
-
-    tasks.withType(JavaCompile).configureEach {
-        options.encoding = "UTF-8"
-        options.compilerArgs += ["-Xlint:deprecation", "-Xlint:unchecked"]
-    }
-
-    compileJava {
-        sourceCompatibility = targetCompatibility = JavaVersion.VERSION_21
-    }
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
 }

@@ -1,8 +1,0 @@
-rootProject.name = 'LiteLogin'
-
-include 'api'
-include 'core'
-include 'loader'
-
-include 'velocity'
-include 'velocity:injector'
